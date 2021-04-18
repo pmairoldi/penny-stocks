@@ -1,0 +1,28 @@
+.Price-yellow {
+  --selected-price-background-color: yellow;
+  --selected-price-color: black;
+}
+
+.Price-purple {
+  --selected-price-background-color: purple;
+  --selected-price-color: white;
+}
+
+.Price-blue {
+  --selected-price-background-color: blue;
+  --selected-price-color: white;
+}
+
+.Price-red {
+  --selected-price-background-color: red;
+  --selected-price-color: white;
+}
+
+.Price-bar {
+  display: flex;
+}
+
+.Price-bar-item-selected {
+  background-color: var(--selected-price-background-color);
+  color: var(--selected-price-color);
+}

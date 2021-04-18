@@ -1,26 +1,43 @@
-import React from "react";
-import logo from "./logo.svg";
+import { FC, useMemo, useState } from "react";
 import "./App.css";
+import { Board } from "./components";
+import { Price } from "./components";
+import { createGame } from "./model/game";
 
-function App() {
+const App: FC = () => {
+  const [game, updateGame] = useState(createGame());
+
+  const prices = useMemo(() => {
+    return game.state.prices;
+  }, [game]);
+
+  const bluePrice = useMemo(() => {
+    return prices.blue;
+  }, [prices]);
+
+  const purplePrice = useMemo(() => {
+    return prices.purple;
+  }, [prices]);
+
+  const yellowPrice = useMemo(() => {
+    return prices.yellow;
+  }, [prices]);
+
+  const redPrice = useMemo(() => {
+    return prices.red;
+  }, [prices]);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Board game={game} updateGame={updateGame} />
+      <div className="Prices">
+        <Price marker="blue" price={bluePrice} />
+        <Price marker="purple" price={purplePrice} />
+        <Price marker="yellow" price={yellowPrice} />
+        <Price marker="red" price={redPrice} />
+      </div>
     </div>
   );
-}
+};
 
 export default App;

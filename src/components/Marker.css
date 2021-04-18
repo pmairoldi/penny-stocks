@@ -1,0 +1,21 @@
+.Marker {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+}
+
+.Marker-blue {
+  background-color: blue;
+}
+
+.Marker-purple {
+  background-color: purple;
+}
+
+.Marker-yellow {
+  background-color: yellow;
+}
+
+.Marker-red {
+  background-color: red;
+}
