@@ -1,49 +1,11 @@
 .App {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
   height: 100%;
   width: 100%;
   position: relative;
 }
 
-.Prices {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-}
-
-.Prices > .Price ~ .Price {
-  margin-top: 4px;
-}
-
-.Players {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-}
-
-.Player-active {
-  color: olivedrab;
-}
-
-.Players > .Player ~ .Player {
-  margin-top: 4px;
-}
-
-.Turn {
+.Clear {
   position: absolute;
   bottom: 10px;
-  right: 10px;
-}
-
-.EndTurn {
-  padding: 10px;
-  border-radius: 8px;
-  color: white;
-  background-color: cornflowerblue;
-}
-
-.EndTurn:disabled {
-  opacity: 0.7;
+  left: 10px;
 }

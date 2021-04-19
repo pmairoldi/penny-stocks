@@ -1,2 +1,1 @@
-export * from "./Board";
-export * from "./Price";
+export * from "./Game";

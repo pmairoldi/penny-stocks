@@ -7,11 +7,12 @@ export interface Price {
   max: number;
 }
 
-type PricesType = {
+type PricesState = {
   [price in Marker]: Price;
 };
 
-export interface Prices extends PricesType {
+export interface Prices {
+  state: PricesState;
   updatePrice(marker: Marker, by: number): Prices;
 }
 
@@ -27,8 +28,24 @@ export function valueFromRawValue(rawValue: number) {
   }
 }
 
+const updatePrice = (state: PricesState) => {
+  return (marker: Marker, by: number): Prices => {
+    const price = state[marker];
+    const rawValue = Math.max(
+      Math.min(price.rawValue + by, price.max),
+      price.min
+    );
+    const value = valueFromRawValue(rawValue);
+
+    const updated = { ...state };
+    updated[marker] = { ...price, rawValue: rawValue, value: value };
+
+    return pricesFromState(updated);
+  };
+};
+
 export function createPrices(): Prices {
-  const state: PricesType = {
+  const state: PricesState = {
     blue: {
       rawValue: defaultPrice,
       value: valueFromRawValue(defaultPrice),
@@ -55,27 +72,18 @@ export function createPrices(): Prices {
     },
   };
 
-  const updatePrice = (state: PricesType) => {
-    return (marker: Marker, by: number): Prices => {
-      const price = state[marker];
-      const rawValue = Math.max(
-        Math.min(price.rawValue + by, price.max),
-        price.min
-      );
-      const value = valueFromRawValue(rawValue);
+  return pricesFromState(state);
+}
 
-      const updated = { ...state };
-      updated[marker] = { ...price, rawValue: rawValue, value: value };
-
-      return {
-        ...updated,
-        updatePrice: updatePrice(updated),
-      };
-    };
-  };
-
+export function pricesFromState(state: PricesState): Prices {
   return {
-    ...state,
+    state: state,
     updatePrice: updatePrice(state),
   };
+}
+
+export function pricesFromJSON(json: { [key: string]: any }): Prices {
+  const state: PricesState = json as PricesState;
+
+  return pricesFromState(state);
 }

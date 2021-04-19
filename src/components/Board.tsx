@@ -29,7 +29,7 @@ export const Board: FC<BoardProps> = (props) => {
 
   return (
     <div className="Board">
-      {board.rows.map((row, index) => {
+      {board.state.rows.map((row, index) => {
         return (
           <div className="Board-row" key={`row-${index}`}>
             {row.map((tile) => {

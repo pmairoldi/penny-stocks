@@ -1,9 +1,9 @@
-import { Board, createBoard } from "./board";
+import { Board, boardFromJSON, createBoard } from "./board";
 import { Marker } from "./marker";
 import { Modifier } from "./modifier";
 import { Player } from "./player";
-import { createPrices, Prices } from "./prices";
-import { createTurn, Turn } from "./turn";
+import { createPrices, Prices, pricesFromJSON } from "./prices";
+import { createTurn, Turn, turnFromJSON } from "./turn";
 import { shuffle } from "./utils";
 
 interface GameState {
@@ -73,10 +73,89 @@ function createMarkers(): Marker[] {
   ]);
 }
 
-export function createGame(
-  players: Player[],
-  onEnd: (state: GameState) => void
-): Game {
+const placeMarker = (state: GameState) => {
+  return (
+    player: Player,
+    row: number,
+    column: number,
+    modifier?: Modifier
+  ): Game => {
+    const { turn, board, prices } = state;
+    const { state: turnState } = turn;
+
+    if (turnState.player.id !== player.id) {
+      return gameFromState(state);
+    }
+
+    if (turnState.marker == null) {
+      return gameFromState(state);
+    }
+
+    const updatedBoard = board.updateTile(row, column, (tile) => {
+      switch (tile.type) {
+        case "default":
+          tile.marker = turnState.marker;
+          return tile;
+        case "modifier":
+          tile.marker = turnState.marker;
+          return tile;
+        case "start":
+          return tile;
+      }
+    });
+
+    const pricesUpdate = pricesModifier(modifier);
+
+    const updatedPrices =
+      pricesUpdate !== false
+        ? prices.updatePrice(turnState.marker, pricesUpdate)
+        : prices;
+
+    const updateMarkers = turnState.markers.slice(1);
+
+    const updated: GameState = {
+      ...state,
+      board: updatedBoard,
+      prices: updatedPrices,
+      turn: turn.updateMarker(updateMarkers),
+    };
+
+    return gameFromState(updated);
+  };
+};
+
+const endTurn = (state: GameState) => {
+  return (player: Player): Game => {
+    const { turn, players, markers } = state;
+    if (turn.state.player.id !== player.id) {
+      return gameFromState(state);
+    }
+
+    const playerIndex = players.findIndex((p) => p.id === player.id);
+
+    const activePlayer =
+      playerIndex === players.length - 1
+        ? players[0]
+        : players[playerIndex + 1];
+
+    const next = createTurn(activePlayer, markers);
+
+    if (next == null) {
+      return gameFromState(state);
+    }
+
+    const { turn: nextTurn, markers: nextMarkers } = next;
+    const updated: GameState = {
+      ...state,
+      turn: nextTurn,
+      markers: nextMarkers,
+    };
+
+    return gameFromState(updated);
+  };
+};
+
+export function createGame(players: Player[]): Game {
   const { turn, markers } = createTurn(players[0], createMarkers())!;
   const state: GameState = {
     board: createBoard(),
@@ -86,111 +165,24 @@ export function createGame(
     turn: turn,
   };
 
-  const placeMarker = (state: GameState) => {
-    return (
-      player: Player,
-      row: number,
-      column: number,
-      modifier?: Modifier
-    ): Game => {
-      const { turn, board, prices } = state;
-      if (turn.player.id !== player.id) {
-        return {
-          state: state,
-          placeMarker: placeMarker(state),
-          endTurn: endTurn(state),
-        };
-      }
+  return gameFromState(state);
+}
 
-      if (turn.marker == null) {
-        onEnd(state);
-        return {
-          state: state,
-          placeMarker: placeMarker(state),
-          endTurn: endTurn(state),
-        };
-      }
-
-      const updatedBoard = board.updateTile(row, column, (tile) => {
-        switch (tile.type) {
-          case "default":
-            tile.marker = turn.marker;
-            return tile;
-          case "modifier":
-            tile.marker = turn.marker;
-            return tile;
-          case "start":
-            return tile;
-        }
-      });
-
-      const pricesUpdate = pricesModifier(modifier);
-
-      const updatedPrices =
-        pricesUpdate !== false
-          ? prices.updatePrice(turn.marker, pricesUpdate)
-          : prices;
-
-      const updateMarkers = turn.markers.slice(1);
-      const updatedMarker = updateMarkers.length > 0 ? updateMarkers[0] : null;
-
-      const updated: GameState = {
-        ...state,
-        board: updatedBoard,
-        prices: updatedPrices,
-        turn: { ...turn, markers: updateMarkers, marker: updatedMarker },
-      };
-
-      return {
-        state: updated,
-        placeMarker: placeMarker(updated),
-        endTurn: endTurn(updated),
-      };
-    };
+export function gameFromState(state: GameState): Game {
+  return {
+    state: state,
+    placeMarker: placeMarker(state),
+    endTurn: endTurn(state),
   };
+}
 
-  const endTurn = (state: GameState) => {
-    return (player: Player): Game => {
-      const { turn, players, markers } = state;
-      if (turn.player.id !== player.id) {
-        return {
-          state: state,
-          placeMarker: placeMarker(state),
-          endTurn: endTurn(state),
-        };
-      }
-
-      const playerIndex = players.findIndex((p) => p.id === player.id);
-
-      const activePlayer =
-        playerIndex === players.length - 1
-          ? players[0]
-          : players[playerIndex + 1];
-
-      const next = createTurn(activePlayer, markers);
-
-      if (next == null) {
-        onEnd(state);
-        return {
-          state: state,
-          placeMarker: placeMarker(state),
-          endTurn: endTurn(state),
-        };
-      }
-
-      const { turn: nextTurn, markers: nextMarkers } = next;
-      const updated: GameState = {
-        ...state,
-        turn: nextTurn,
-        markers: nextMarkers,
-      };
-
-      return {
-        state: updated,
-        placeMarker: placeMarker(updated),
-        endTurn: endTurn(updated),
-      };
-    };
+export function gameFromJSON(json: { [key: string]: any }): Game {
+  const state: GameState = {
+    board: boardFromJSON(json.board),
+    prices: pricesFromJSON(json.prices),
+    players: json.players,
+    markers: json.markers,
+    turn: turnFromJSON(json.turn),
   };
 
   return {

@@ -2,10 +2,16 @@ import { Marker } from "./marker";
 import { Player } from "./player";
 import { shuffle } from "./utils";
 
-export interface Turn {
+interface TurnState {
   player: Player;
   markers: Marker[];
   marker: Marker | null;
+}
+
+export interface Turn {
+  state: TurnState;
+  updateMarker(markers: Marker[]): Turn;
+  canEnd: () => boolean;
 }
 
 function pick<T>(array: T[]): { item: T; remaining: T[] } | null {
@@ -25,11 +31,11 @@ export function createTurn(
   const firstPick = pick(markers.slice());
   if (firstPick == null) {
     return {
-      turn: {
+      turn: turnFromState({
         player: player,
         markers: turnMarkers,
         marker: turnMarkers.length > 0 ? turnMarkers[0] : null,
-      },
+      }),
       markers: [],
     };
   } else {
@@ -39,11 +45,11 @@ export function createTurn(
   const secondPick = pick(firstPick.remaining);
   if (secondPick == null) {
     return {
-      turn: {
+      turn: turnFromState({
         player: player,
         markers: turnMarkers,
         marker: turnMarkers.length > 0 ? turnMarkers[0] : null,
-      },
+      }),
       markers: [],
     };
   } else {
@@ -53,11 +59,11 @@ export function createTurn(
   const thirdPick = pick(secondPick.remaining);
   if (thirdPick == null) {
     return {
-      turn: {
+      turn: turnFromState({
         player: player,
         markers: turnMarkers,
         marker: turnMarkers.length > 0 ? turnMarkers[0] : null,
-      },
+      }),
       markers: [],
     };
   } else {
@@ -65,11 +71,47 @@ export function createTurn(
   }
 
   return {
-    turn: {
+    turn: turnFromState({
       player: player,
       markers: turnMarkers,
       marker: turnMarkers[0],
-    },
+    }),
     markers: thirdPick.remaining,
   };
+}
+
+const updateMarker = (state: TurnState) => {
+  return (markers: Marker[]): Turn => {
+    const updated: TurnState = {
+      ...state,
+      markers: markers,
+      marker: markers.length > 0 ? markers[0] : null,
+    };
+
+    return turnFromState(updated);
+  };
+};
+
+const canEnd = (state: TurnState) => {
+  return (): boolean => {
+    return state.markers.length === 0;
+  };
+};
+
+export function turnFromState(state: TurnState): Turn {
+  return {
+    state: state,
+    updateMarker: updateMarker(state),
+    canEnd: canEnd(state),
+  };
+}
+
+export function turnFromJSON(json: { [key: string]: any }): Turn {
+  const state: TurnState = {
+    player: json.player,
+    markers: json.markers,
+    marker: json.marker,
+  };
+
+  return turnFromState(state);
 }

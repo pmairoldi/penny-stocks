@@ -4,8 +4,11 @@ import { getRandomItem, removeItem } from "./utils";
 
 type Row = Tile[];
 
-export interface Board {
+interface BoardState {
   rows: Row[];
+}
+export interface Board {
+  state: BoardState;
   updateTile: (
     row: number,
     column: number,
@@ -133,6 +136,26 @@ const createModifers = (): Modifier[] => {
   ];
 };
 
+const updateTile = (state: BoardState) => {
+  return (
+    row: number,
+    column: number,
+    callback: (tile: Tile) => Tile
+  ): Board => {
+    const { rows } = state;
+    const updatedRows = rows.slice();
+    const tiles = updatedRows[row].slice();
+    const tile = tiles[column];
+
+    tiles[column] = callback({ ...tile });
+    updatedRows[row] = tiles;
+
+    const updated = { rows: updatedRows };
+
+    return boardFromState(updated);
+  };
+};
+
 export function createBoard(): Board {
   const modifiers = createModifers();
   const getModifier = (): Modifier => {
@@ -154,25 +177,24 @@ export function createBoard(): Board {
         });
     });
 
-  const updateTile = (rows: Row[]) => {
-    return (
-      row: number,
-      column: number,
-      callback: (tile: Tile) => Tile
-    ): Board => {
-      const updated = rows.slice();
-      const tiles = updated[row].slice();
-      const tile = tiles[column];
+  const state = { rows: rows };
+  return boardFromState(state);
+}
 
-      tiles[column] = callback({ ...tile });
-      updated[row] = tiles;
+export function boardFromState(state: BoardState): Board {
+  return {
+    state: state,
+    updateTile: updateTile(state),
+  };
+}
 
-      return { rows: updated, updateTile: updateTile(updated) };
-    };
+export function boardFromJSON(json: { [key: string]: any }): Board {
+  const state: BoardState = {
+    rows: json.rows,
   };
 
   return {
-    rows: rows,
-    updateTile: updateTile(rows),
+    state: state,
+    updateTile: updateTile(state),
   };
 }
