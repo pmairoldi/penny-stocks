@@ -23,6 +23,27 @@
   left: 10px;
 }
 
+.Player-active {
+  color: olivedrab;
+}
+
 .Players > .Player ~ .Player {
   margin-top: 4px;
+}
+
+.Turn {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+}
+
+.EndTurn {
+  padding: 10px;
+  border-radius: 8px;
+  color: white;
+  background-color: cornflowerblue;
+}
+
+.EndTurn:disabled {
+  opacity: 0.7;
 }

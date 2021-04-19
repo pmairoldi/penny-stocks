@@ -3,24 +3,26 @@ import { Marker } from "./marker";
 import { Modifier } from "./modifier";
 import { Player } from "./player";
 import { createPrices, Prices } from "./prices";
-import { removeItem, replaceItem } from "./utils";
+import { createTurn, Turn } from "./turn";
+import { shuffle } from "./utils";
 
 interface GameState {
   board: Board;
   prices: Prices;
   players: Player[];
+  markers: Marker[];
+  turn: Turn;
 }
 
 export interface Game {
   state: GameState;
-  setMarker: (
+  placeMarker: (
+    player: Player,
     row: number,
     column: number,
-    marker: Marker,
     modifier?: Modifier
   ) => Game;
-  addPlayer(player: Player): Game;
-  removePlayer(player: Player): Game;
+  endTurn: (player: Player) => Game;
 }
 
 function pricesModifier(modifier?: Modifier): number | false {
@@ -58,29 +60,64 @@ function pricesModifier(modifier?: Modifier): number | false {
   }
 }
 
-export function createGame(): Game {
+function createMarkers(): Marker[] {
+  const createMarkersOfType = (marker: Marker) => {
+    return new Array<Marker>(24).fill(marker);
+  };
+
+  return shuffle([
+    ...createMarkersOfType("red"),
+    ...createMarkersOfType("blue"),
+    ...createMarkersOfType("purple"),
+    ...createMarkersOfType("yellow"),
+  ]);
+}
+
+export function createGame(
+  players: Player[],
+  onEnd: (state: GameState) => void
+): Game {
+  const { turn, markers } = createTurn(players[0], createMarkers())!;
   const state: GameState = {
     board: createBoard(),
     prices: createPrices(),
-    players: [],
+    players: players,
+    markers: markers,
+    turn: turn,
   };
 
-  const setMarker = (state: GameState) => {
+  const placeMarker = (state: GameState) => {
     return (
+      player: Player,
       row: number,
       column: number,
-      marker: Marker,
       modifier?: Modifier
     ): Game => {
-      const { board, prices } = state;
+      const { turn, board, prices } = state;
+      if (turn.player.id !== player.id) {
+        return {
+          state: state,
+          placeMarker: placeMarker(state),
+          endTurn: endTurn(state),
+        };
+      }
+
+      if (turn.marker == null) {
+        onEnd(state);
+        return {
+          state: state,
+          placeMarker: placeMarker(state),
+          endTurn: endTurn(state),
+        };
+      }
 
       const updatedBoard = board.updateTile(row, column, (tile) => {
         switch (tile.type) {
           case "default":
-            tile.marker = marker;
+            tile.marker = turn.marker;
             return tile;
           case "modifier":
-            tile.marker = marker;
+            tile.marker = turn.marker;
             return tile;
           case "start":
             return tile;
@@ -91,61 +128,74 @@ export function createGame(): Game {
 
       const updatedPrices =
         pricesUpdate !== false
-          ? prices.updatePrice(marker, pricesUpdate)
+          ? prices.updatePrice(turn.marker, pricesUpdate)
           : prices;
 
-      const updated = { ...state, board: updatedBoard, prices: updatedPrices };
+      const updateMarkers = turn.markers.slice(1);
+      const updatedMarker = updateMarkers.length > 0 ? updateMarkers[0] : null;
+
+      const updated: GameState = {
+        ...state,
+        board: updatedBoard,
+        prices: updatedPrices,
+        turn: { ...turn, markers: updateMarkers, marker: updatedMarker },
+      };
 
       return {
         state: updated,
-        setMarker: setMarker(updated),
-        addPlayer: addPlayer(updated),
-        removePlayer: removePlayer(updated),
+        placeMarker: placeMarker(updated),
+        endTurn: endTurn(updated),
       };
     };
   };
 
-  const addPlayer = (state: GameState) => {
+  const endTurn = (state: GameState) => {
     return (player: Player): Game => {
-      const players = state.players.slice();
-      const existing = players.findIndex((p) => p.id === player.id);
-
-      if (existing === -1) {
-        players.push(player);
-      } else {
-        replaceItem(players, (p) => p.id === player.id, player);
+      const { turn, players, markers } = state;
+      if (turn.player.id !== player.id) {
+        return {
+          state: state,
+          placeMarker: placeMarker(state),
+          endTurn: endTurn(state),
+        };
       }
 
-      const updated = { ...state, players: players };
-      return {
-        state: updated,
-        setMarker: setMarker(updated),
-        addPlayer: addPlayer(updated),
-        removePlayer: removePlayer(updated),
+      const playerIndex = players.findIndex((p) => p.id === player.id);
+
+      const activePlayer =
+        playerIndex === players.length - 1
+          ? players[0]
+          : players[playerIndex + 1];
+
+      const next = createTurn(activePlayer, markers);
+
+      if (next == null) {
+        onEnd(state);
+        return {
+          state: state,
+          placeMarker: placeMarker(state),
+          endTurn: endTurn(state),
+        };
+      }
+
+      const { turn: nextTurn, markers: nextMarkers } = next;
+      const updated: GameState = {
+        ...state,
+        turn: nextTurn,
+        markers: nextMarkers,
       };
-    };
-  };
-
-  const removePlayer = (state: GameState) => {
-    return (player: Player): Game => {
-      const players = state.players.slice();
-      removeItem(players, (p) => p.id === player.id);
-
-      const updated = { ...state, players: players };
 
       return {
         state: updated,
-        setMarker: setMarker(updated),
-        addPlayer: addPlayer(updated),
-        removePlayer: removePlayer(updated),
+        placeMarker: placeMarker(updated),
+        endTurn: endTurn(updated),
       };
     };
   };
 
   return {
     state: state,
-    setMarker: setMarker(state),
-    addPlayer: addPlayer(state),
-    removePlayer: removePlayer(state),
+    placeMarker: placeMarker(state),
+    endTurn: endTurn(state),
   };
 }

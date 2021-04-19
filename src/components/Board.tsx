@@ -6,11 +6,11 @@ import { DefaultTile, ModifierTile, StartTile } from "./Tile";
 
 interface BoardProps {
   game: Game;
-  updateGame: (game: Game) => void;
+  placeMarker: (row: number, column: number, modifier?: Modifier) => void;
 }
 
 export const Board: FC<BoardProps> = (props) => {
-  const { game, updateGame } = props;
+  const { game, placeMarker } = props;
 
   const state = useMemo(() => {
     return game.state;
@@ -22,9 +22,9 @@ export const Board: FC<BoardProps> = (props) => {
 
   const onTileClick = useCallback(
     (row: number, column: number, modifier?: Modifier) => {
-      updateGame(game.setMarker(row, column, "yellow", modifier));
+      placeMarker(row, column, modifier);
     },
-    [game, updateGame]
+    [placeMarker]
   );
 
   return (

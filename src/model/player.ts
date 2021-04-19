@@ -1,8 +1,12 @@
 import { Marker } from "./marker";
 
+type PlayserStocksType = {
+  [price in Marker]: number;
+};
+
 interface PlayerState {
-  markers: Marker[];
-  value: number;
+  money: number;
+  stocks: PlayserStocksType;
 }
 
 export interface Player {
@@ -12,5 +16,9 @@ export interface Player {
 }
 
 export function createPlayer(id: string, name: string): Player {
-  return { id: id, name: name, state: { markers: [], value: 20 } };
+  return {
+    id: id,
+    name: name,
+    state: { money: 20, stocks: { red: 1, blue: 1, purple: 1, yellow: 1 } },
+  };
 }
