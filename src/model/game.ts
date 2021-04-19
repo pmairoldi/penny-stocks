@@ -1,11 +1,14 @@
 import { Board, createBoard } from "./board";
 import { Marker } from "./marker";
 import { Modifier } from "./modifier";
+import { Player } from "./player";
 import { createPrices, Prices } from "./prices";
+import { removeItem, replaceItem } from "./utils";
 
 interface GameState {
   board: Board;
   prices: Prices;
+  players: Player[];
 }
 
 export interface Game {
@@ -16,6 +19,8 @@ export interface Game {
     marker: Marker,
     modifier?: Modifier
   ) => Game;
+  addPlayer(player: Player): Game;
+  removePlayer(player: Player): Game;
 }
 
 function pricesModifier(modifier?: Modifier): number | false {
@@ -57,6 +62,7 @@ export function createGame(): Game {
   const state: GameState = {
     board: createBoard(),
     prices: createPrices(),
+    players: [],
   };
 
   const setMarker = (state: GameState) => {
@@ -89,9 +95,49 @@ export function createGame(): Game {
           : prices;
 
       const updated = { ...state, board: updatedBoard, prices: updatedPrices };
+
       return {
         state: updated,
         setMarker: setMarker(updated),
+        addPlayer: addPlayer(updated),
+        removePlayer: removePlayer(updated),
+      };
+    };
+  };
+
+  const addPlayer = (state: GameState) => {
+    return (player: Player): Game => {
+      const players = state.players.slice();
+      const existing = players.findIndex((p) => p.id === player.id);
+
+      if (existing === -1) {
+        players.push(player);
+      } else {
+        replaceItem(players, (p) => p.id === player.id, player);
+      }
+
+      const updated = { ...state, players: players };
+      return {
+        state: updated,
+        setMarker: setMarker(updated),
+        addPlayer: addPlayer(updated),
+        removePlayer: removePlayer(updated),
+      };
+    };
+  };
+
+  const removePlayer = (state: GameState) => {
+    return (player: Player): Game => {
+      const players = state.players.slice();
+      removeItem(players, (p) => p.id === player.id);
+
+      const updated = { ...state, players: players };
+
+      return {
+        state: updated,
+        setMarker: setMarker(updated),
+        addPlayer: addPlayer(updated),
+        removePlayer: removePlayer(updated),
       };
     };
   };
@@ -99,5 +145,7 @@ export function createGame(): Game {
   return {
     state: state,
     setMarker: setMarker(state),
+    addPlayer: addPlayer(state),
+    removePlayer: removePlayer(state),
   };
 }

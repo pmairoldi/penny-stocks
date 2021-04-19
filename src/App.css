@@ -16,3 +16,13 @@
 .Prices > .Price ~ .Price {
   margin-top: 4px;
 }
+
+.Players {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+.Players > .Player ~ .Player {
+  margin-top: 4px;
+}

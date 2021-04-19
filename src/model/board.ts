@@ -1,5 +1,6 @@
 import { Modifier } from "./modifier";
 import { Tile } from "./tile";
+import { getRandomItem, removeItem } from "./utils";
 
 type Row = Tile[];
 
@@ -132,23 +133,12 @@ const createModifers = (): Modifier[] => {
   ];
 };
 
-const getRandomItem = <T>(array: T[]): T => {
-  return array[Math.floor(Math.random() * array.length)];
-};
-
-const removeItem = <T>(array: T[], item: T): void => {
-  const index = array.indexOf(item);
-  if (index > -1) {
-    array.splice(index, 1);
-  }
-};
-
 export function createBoard(): Board {
   const modifiers = createModifers();
   const getModifier = (): Modifier => {
     var modifer = getRandomItem(modifiers);
 
-    removeItem(modifiers, modifer);
+    removeItem(modifiers, (item) => item === modifer);
 
     return modifer;
   };
