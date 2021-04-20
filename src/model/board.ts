@@ -132,7 +132,7 @@ const createModifers = (): Modifier[] => {
     ...create("minus-2", 6),
     ...create("minus-3", 4),
     ...create("payday", 8),
-    ...create("illness", 8),
+    ...create("crash", 8),
   ];
 };
 
@@ -188,7 +188,11 @@ export function boardFromState(state: BoardState): Board {
   };
 }
 
-export function boardFromJSON(json: { [key: string]: any }): Board {
+export interface BoardDTO {
+  rows: Row[];
+}
+
+export function boardFromJSON(json: BoardDTO): Board {
   const state: BoardState = {
     rows: json.rows,
   };
@@ -196,5 +200,11 @@ export function boardFromJSON(json: { [key: string]: any }): Board {
   return {
     state: state,
     updateTile: updateTile(state),
+  };
+}
+
+export function jsonFromBoard(board: Board): BoardDTO {
+  return {
+    rows: board.state.rows,
   };
 }

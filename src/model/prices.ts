@@ -82,8 +82,12 @@ export function pricesFromState(state: PricesState): Prices {
   };
 }
 
-export function pricesFromJSON(json: { [key: string]: any }): Prices {
-  const state: PricesState = json as PricesState;
+export type PricesDTO = PricesState;
 
-  return pricesFromState(state);
+export function pricesFromJSON(json: PricesDTO): Prices {
+  return pricesFromState(json);
+}
+
+export function jsonFromPrices(prices: Prices): PricesDTO {
+  return prices.state;
 }

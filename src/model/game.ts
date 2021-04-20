@@ -1,9 +1,21 @@
-import { Board, boardFromJSON, createBoard } from "./board";
+import {
+  Board,
+  BoardDTO,
+  boardFromJSON,
+  createBoard,
+  jsonFromBoard,
+} from "./board";
 import { Marker } from "./marker";
-import { Modifier } from "./modifier";
-import { Player } from "./player";
-import { createPrices, Prices, pricesFromJSON } from "./prices";
-import { createTurn, Turn, turnFromJSON } from "./turn";
+import { Modifier, PlayerModifier } from "./modifier";
+import { jsonFromPlayer, Player, PlayerDTO, playerFromJSON } from "./player";
+import {
+  createPrices,
+  jsonFromPrices,
+  Prices,
+  PricesDTO,
+  pricesFromJSON,
+} from "./prices";
+import { createTurn, jsonFromTurn, Turn, TurnDTO, turnFromJSON } from "./turn";
 import { shuffle } from "./utils";
 
 interface GameState {
@@ -49,11 +61,46 @@ function pricesModifier(modifier?: Modifier): number | false {
       case "minus-3":
         return -3;
 
-      case "illness":
+      case "crash":
         return false;
 
       case "payday":
         return false;
+    }
+  } else {
+    return false;
+  }
+}
+
+function actionModifier(modifier?: Modifier): PlayerModifier | false {
+  if (modifier) {
+    switch (modifier) {
+      case "plus-1":
+        return false;
+
+      case "plus-2":
+        return false;
+
+      case "plus-3":
+        return false;
+
+      case "plus-5":
+        return false;
+
+      case "minus-1":
+        return false;
+
+      case "minus-2":
+        return false;
+
+      case "minus-3":
+        return false;
+
+      case "crash":
+        return modifier;
+
+      case "payday":
+        return modifier;
     }
   } else {
     return false;
@@ -80,7 +127,7 @@ const placeMarker = (state: GameState) => {
     column: number,
     modifier?: Modifier
   ): Game => {
-    const { turn, board, prices } = state;
+    const { turn, board, prices, players } = state;
     const { state: turnState } = turn;
 
     if (turnState.player.id !== player.id) {
@@ -91,13 +138,14 @@ const placeMarker = (state: GameState) => {
       return gameFromState(state);
     }
 
+    const marker = turnState.marker;
     const updatedBoard = board.updateTile(row, column, (tile) => {
       switch (tile.type) {
         case "default":
-          tile.marker = turnState.marker;
+          tile.marker = marker;
           return tile;
         case "modifier":
-          tile.marker = turnState.marker;
+          tile.marker = marker;
           return tile;
         case "start":
           return tile;
@@ -108,8 +156,27 @@ const placeMarker = (state: GameState) => {
 
     const updatedPrices =
       pricesUpdate !== false
-        ? prices.updatePrice(turnState.marker, pricesUpdate)
+        ? prices.updatePrice(marker, pricesUpdate)
         : prices;
+
+    const price = updatedPrices.state[marker];
+
+    const actionsUpate = actionModifier(modifier);
+    const updatedPlayers =
+      actionsUpate !== false
+        ? players.map((p) => {
+            switch (actionsUpate) {
+              case "crash":
+                return p.crash(marker, price.value);
+
+              case "payday":
+                return p.payday(marker, price.value);
+
+              default:
+                return p;
+            }
+          })
+        : players;
 
     const updateMarkers = turnState.markers.slice(1);
 
@@ -117,6 +184,7 @@ const placeMarker = (state: GameState) => {
       ...state,
       board: updatedBoard,
       prices: updatedPrices,
+      players: updatedPlayers,
       turn: turn.updateMarker(updateMarkers),
     };
 
@@ -176,11 +244,19 @@ export function gameFromState(state: GameState): Game {
   };
 }
 
-export function gameFromJSON(json: { [key: string]: any }): Game {
+export interface GameDTO {
+  board: BoardDTO;
+  prices: PricesDTO;
+  players: PlayerDTO[];
+  markers: Marker[];
+  turn: TurnDTO;
+}
+
+export function gameFromJSON(json: GameDTO): Game {
   const state: GameState = {
     board: boardFromJSON(json.board),
     prices: pricesFromJSON(json.prices),
-    players: json.players,
+    players: json.players.map((p) => playerFromJSON(p)),
     markers: json.markers,
     turn: turnFromJSON(json.turn),
   };
@@ -189,5 +265,15 @@ export function gameFromJSON(json: { [key: string]: any }): Game {
     state: state,
     placeMarker: placeMarker(state),
     endTurn: endTurn(state),
+  };
+}
+
+export function jsonFromGame(game: Game): GameDTO {
+  return {
+    board: jsonFromBoard(game.state.board),
+    prices: jsonFromPrices(game.state.prices),
+    players: game.state.players.map((p) => jsonFromPlayer(p)),
+    markers: game.state.markers,
+    turn: jsonFromTurn(game.state.turn),
   };
 }

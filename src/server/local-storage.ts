@@ -1,27 +1,7 @@
-import { createGame, createPlayer, Game, gameFromJSON } from "../model";
+import { Game } from "../model";
+import { Connect, mapGame, parseGame } from "./server";
 
-export interface Server {
-  game: Game;
-  update: (game: Game) => void;
-  clear: () => void;
-}
-
-function parseGame(json: string | null): Game {
-  const game =
-    json == null
-      ? createGame([
-          createPlayer("test-1", "Test User 1"),
-          createPlayer("test-2", "Test User 2"),
-        ])
-      : gameFromJSON(JSON.parse(json));
-
-  return game;
-}
-
-export function connect(
-  gameId: string,
-  onUpdate: (game: Game) => void
-): { server: Server; cleanup: () => void } {
+export const connect: Connect = (gameId, onUpdate) => {
   const storageKey = `penny-stock.${gameId}`;
 
   const json = localStorage.getItem(storageKey);
@@ -36,16 +16,7 @@ export function connect(
   window.addEventListener("storage", stroageUpdate);
 
   const update = (game: Game) => {
-    const { state } = game;
-    const { board, prices, players, markers, turn } = state;
-
-    const json = {
-      board: board.state,
-      prices: prices.state,
-      players: players,
-      markers: markers,
-      turn: turn.state,
-    };
+    const json = mapGame(game);
 
     localStorage.setItem(storageKey, JSON.stringify(json));
 
@@ -66,4 +37,4 @@ export function connect(
       window.removeEventListener("storage", stroageUpdate);
     },
   };
-}
+};

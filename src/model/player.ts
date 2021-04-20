@@ -5,20 +5,88 @@ type PlayserStocksType = {
 };
 
 interface PlayerState {
+  id: string;
+  name: string;
   money: number;
   stocks: PlayserStocksType;
 }
 
 export interface Player {
+  state: PlayerState;
   id: string;
   name: string;
-  state: PlayerState;
+  crash: (marker: Marker, price: number) => Player;
+  payday: (marker: Marker, price: number) => Player;
 }
 
+const crash = (state: PlayerState) => {
+  return (marker: Marker, price: number): Player => {
+    const { money, stocks } = state;
+    const stock = stocks[marker];
+
+    const updatedMoney = money - stock * price;
+    const updated = { ...state, money: updatedMoney };
+
+    return playerFromState(updated);
+  };
+};
+
+const payday = (state: PlayerState) => {
+  return (marker: Marker, price: number): Player => {
+    const { money, stocks } = state;
+    const stock = stocks[marker];
+
+    const updatedMoney = money + stock * price;
+    const updated = { ...state, money: updatedMoney };
+
+    return playerFromState(updated);
+  };
+};
+
 export function createPlayer(id: string, name: string): Player {
-  return {
+  const state: PlayerState = {
     id: id,
     name: name,
-    state: { money: 20, stocks: { red: 1, blue: 1, purple: 1, yellow: 1 } },
+    money: 20,
+    stocks: { red: 1, blue: 1, purple: 1, yellow: 1 },
+  };
+
+  return playerFromState(state);
+}
+
+export function playerFromState(state: PlayerState): Player {
+  return {
+    state: state,
+    id: state.id,
+    name: state.name,
+    crash: crash(state),
+    payday: payday(state),
+  };
+}
+
+export interface PlayerDTO {
+  id: string;
+  name: string;
+  money: number;
+  stocks: PlayserStocksType;
+}
+
+export function playerFromJSON(json: PlayerDTO): Player {
+  const state: PlayerState = {
+    id: json.id,
+    name: json.name,
+    money: json.money,
+    stocks: json.stocks,
+  };
+
+  return playerFromState(state);
+}
+
+export function jsonFromPlayer(player: Player): PlayerDTO {
+  return {
+    id: player.state.id,
+    name: player.state.name,
+    money: player.state.money,
+    stocks: player.state.stocks,
   };
 }

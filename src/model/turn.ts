@@ -1,5 +1,5 @@
 import { Marker } from "./marker";
-import { Player } from "./player";
+import { jsonFromPlayer, Player, PlayerDTO, playerFromJSON } from "./player";
 import { shuffle } from "./utils";
 
 interface TurnState {
@@ -106,12 +106,26 @@ export function turnFromState(state: TurnState): Turn {
   };
 }
 
-export function turnFromJSON(json: { [key: string]: any }): Turn {
+export interface TurnDTO {
+  player: PlayerDTO;
+  markers: Marker[];
+  marker: Marker | null;
+}
+
+export function turnFromJSON(json: TurnDTO): Turn {
   const state: TurnState = {
-    player: json.player,
+    player: playerFromJSON(json.player),
     markers: json.markers,
     marker: json.marker,
   };
 
   return turnFromState(state);
+}
+
+export function jsonFromTurn(turn: Turn): TurnDTO {
+  return {
+    player: jsonFromPlayer(turn.state.player),
+    markers: turn.state.markers,
+    marker: turn.state.marker,
+  };
 }
