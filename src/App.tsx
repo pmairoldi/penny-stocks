@@ -1,35 +1,23 @@
-import { FC, useEffect, useState } from "react";
+import { FC } from "react";
+import { Route, Switch } from "react-router-dom";
 import "./App.css";
-import { Game } from "./components";
-import { connect, Server } from "./server";
+import { Home, Room } from "./pages";
 
 const App: FC = () => {
-  const [server, updateServer] = useState<Server>();
-
-  useEffect(() => {
-    const { server, cleanup } = connect("test-game", (game) => {
-      updateServer({ ...server, game: game });
-    });
-
-    updateServer(server);
-
-    return () => {
-      cleanup();
-    };
-  }, [updateServer]);
-
   return (
     <div className="App">
-      {server == null ? (
-        "connect"
-      ) : (
-        <>
-          <Game game={server.game} updateGame={server.update} />
-          <button className="Clear" onClick={server.clear}>
-            Clear
-          </button>
-        </>
-      )}
+      <Switch>
+        <Route exact path="/">
+          <Home />
+        </Route>
+        <Route path="/room/create">
+          <Room />
+        </Route>
+        <Route path="/room/:id">
+          <Room />
+        </Route>
+        <Route path="*">{404}</Route>
+      </Switch>
     </div>
   );
 };

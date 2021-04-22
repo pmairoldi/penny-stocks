@@ -1,11 +1,8 @@
-import { Game } from "../model";
-import { Connect, mapGame, parseGame } from "./server";
+import { createGame, createPlayer, Game } from "../model";
+import { mapGame, parseGame, Server } from "./server";
 
-export const connect: Connect = (gameId, onUpdate) => {
-  const storageKey = `penny-stock.${gameId}`;
-
-  const json = localStorage.getItem(storageKey);
-  const game = parseGame(json);
+const local = (id: string, onUpdate: (game: Game) => void) => {
+  const storageKey = `penny-stock.${id}`;
 
   const stroageUpdate = (event: StorageEvent) => {
     if (event.newValue != null) {
@@ -17,24 +14,64 @@ export const connect: Connect = (gameId, onUpdate) => {
 
   const update = (game: Game) => {
     const json = mapGame(game);
-
     localStorage.setItem(storageKey, JSON.stringify(json));
-
     onUpdate(game);
   };
 
-  const clear = () => {
-    update(parseGame(null));
-  };
+  const json = localStorage.getItem(storageKey);
+  const game = json != null ? parseGame(json) : null;
 
   return {
-    server: {
-      game: game,
-      update: update,
-      clear: clear,
-    },
+    game: game,
+    update: update,
     cleanup: () => {
       window.removeEventListener("storage", stroageUpdate);
     },
   };
+};
+
+export const server: Server = {
+  create: (name, onUpdate) => {
+    return new Promise((resolve, rejects) => {
+      const gameId = Math.floor(Math.random() * 101);
+      const playerId = Math.floor(Math.random() * 101);
+
+      const me = createPlayer(`${playerId}`, name);
+      const game = createGame(`${gameId}`, [me]);
+
+      const storage = local(game.id, onUpdate);
+
+      storage.update(game);
+
+      resolve({
+        me: me,
+        game: game,
+        update: storage.update,
+        cleanup: storage.cleanup,
+      });
+    });
+  },
+  join: (id, name, onUpdate) => {
+    return new Promise((resolve, rejects) => {
+      const storage = local(id, onUpdate);
+
+      if (storage.game == null) {
+        rejects("NO GAME");
+      } else {
+        const playerId = Math.floor(Math.random() * 101);
+
+        const me = createPlayer(`${playerId}`, name);
+        const game = storage.game.addPlayer(me);
+
+        storage.update(game);
+
+        resolve({
+          me: me,
+          game: game,
+          update: storage.update,
+          cleanup: storage.cleanup,
+        });
+      }
+    });
+  },
 };

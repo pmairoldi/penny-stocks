@@ -1,22 +1,17 @@
 import { FC, useCallback, useMemo } from "react";
-import { Game as GameModel, Modifier } from "../model";
+import { Game as GameModel, Modifier, Player } from "../model";
 import { Board } from "./Board";
 import "./Game.css";
 import { Price } from "./Price";
 
 interface GameProps {
+  me: Player;
   game: GameModel;
   updateGame: (game: GameModel) => void;
 }
 
 export const Game: FC<GameProps> = (props) => {
-  const { game, updateGame } = props;
-
-  const me = useMemo(() => {
-    const query = new URLSearchParams(window.location.search);
-    const id = query.get("id");
-    return game.state.players.find((p) => p.id === id);
-  }, [game]);
+  const { me, game, updateGame } = props;
 
   const prices = useMemo(() => {
     return game.state.prices.state;

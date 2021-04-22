@@ -19,6 +19,7 @@ import { createTurn, jsonFromTurn, Turn, TurnDTO, turnFromJSON } from "./turn";
 import { shuffle } from "./utils";
 
 interface GameState {
+  id: string;
   board: Board;
   prices: Prices;
   players: Player[];
@@ -28,6 +29,7 @@ interface GameState {
 
 export interface Game {
   state: GameState;
+  id: string;
   placeMarker: (
     player: Player,
     row: number,
@@ -35,6 +37,8 @@ export interface Game {
     modifier?: Modifier
   ) => Game;
   endTurn: (player: Player) => Game;
+  addPlayer: (player: Player) => Game;
+  removePlayer: (player: Player) => Game;
 }
 
 function pricesModifier(modifier?: Modifier): number | false {
@@ -223,9 +227,39 @@ const endTurn = (state: GameState) => {
   };
 };
 
-export function createGame(players: Player[]): Game {
+const addPlayer = (state: GameState) => {
+  return (player: Player): Game => {
+    const { players } = state;
+
+    const found = players.findIndex((p) => p.id === player.id);
+    if (found !== -1) {
+      return gameFromState(state);
+    } else {
+      const updated: GameState = {
+        ...state,
+        players: players.concat(player),
+      };
+      return gameFromState(updated);
+    }
+  };
+};
+
+const removePlayer = (state: GameState) => {
+  return (player: Player): Game => {
+    const { players } = state;
+
+    const updated: GameState = {
+      ...state,
+      players: players.filter((p) => p.id !== player.id),
+    };
+    return gameFromState(updated);
+  };
+};
+
+export function createGame(id: string, players: Player[]): Game {
   const { turn, markers } = createTurn(players[0], createMarkers())!;
   const state: GameState = {
+    id: id,
     board: createBoard(),
     prices: createPrices(),
     players: players,
@@ -239,12 +273,16 @@ export function createGame(players: Player[]): Game {
 export function gameFromState(state: GameState): Game {
   return {
     state: state,
+    id: state.id,
     placeMarker: placeMarker(state),
     endTurn: endTurn(state),
+    addPlayer: addPlayer(state),
+    removePlayer: removePlayer(state),
   };
 }
 
 export interface GameDTO {
+  id: string;
   board: BoardDTO;
   prices: PricesDTO;
   players: PlayerDTO[];
@@ -254,6 +292,7 @@ export interface GameDTO {
 
 export function gameFromJSON(json: GameDTO): Game {
   const state: GameState = {
+    id: json.id,
     board: boardFromJSON(json.board),
     prices: pricesFromJSON(json.prices),
     players: json.players.map((p) => playerFromJSON(p)),
@@ -261,15 +300,12 @@ export function gameFromJSON(json: GameDTO): Game {
     turn: turnFromJSON(json.turn),
   };
 
-  return {
-    state: state,
-    placeMarker: placeMarker(state),
-    endTurn: endTurn(state),
-  };
+  return gameFromState(state);
 }
 
 export function jsonFromGame(game: Game): GameDTO {
   return {
+    id: game.state.id,
     board: jsonFromBoard(game.state.board),
     prices: jsonFromPrices(game.state.prices),
     players: game.state.players.map((p) => jsonFromPlayer(p)),

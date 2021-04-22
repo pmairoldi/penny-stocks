@@ -1,35 +1,32 @@
-import {
-  createGame,
-  createPlayer,
-  Game,
-  GameDTO,
-  gameFromJSON,
-  jsonFromGame,
-} from "../model";
+import { Game, GameDTO, gameFromJSON, jsonFromGame, Player } from "../model";
 
-export interface Server {
+export interface Session {
+  me: Player;
   game: Game;
   update: (game: Game) => void;
-  clear: () => void;
+  cleanup: () => void;
 }
 
-export type Connect = (
-  gameId: string,
+export type Create = (
+  name: string,
   onUpdate: (game: Game) => void
-) => { server: Server; cleanup: () => void };
+) => Promise<Session>;
 
-export function parseGame(json: string | null): Game {
-  const game =
-    json == null
-      ? createGame([
-          createPlayer("test-1", "Test User 1"),
-          createPlayer("test-2", "Test User 2"),
-        ])
-      : gameFromJSON(JSON.parse(json));
+export type Join = (
+  gameId: string,
+  name: string,
+  onUpdate: (game: Game) => void
+) => Promise<Session>;
 
-  return game;
+export function parseGame(json: string): Game {
+  return gameFromJSON(JSON.parse(json));
 }
 
 export function mapGame(game: Game): GameDTO {
   return jsonFromGame(game);
+}
+
+export interface Server {
+  create: Create;
+  join: Join;
 }
