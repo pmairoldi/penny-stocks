@@ -1,5 +1,5 @@
 import { FC, useCallback, useMemo } from "react";
-import { Game as GameModel, Modifier, Player } from "../model";
+import { Game as GameModel, Marker, Modifier, Player } from "../model";
 import { Board } from "./Board";
 import "./Game.css";
 import { Price } from "./Price";
@@ -44,14 +44,14 @@ export const Game: FC<GameProps> = (props) => {
   const placeMarker = useCallback(
     (row: number, column: number, modifier?: Modifier) => {
       if (me != null) {
-        updateGame(game.placeMarker(me, row, column, modifier));
+        updateGame(game.placeMarker(me.id, row, column, modifier));
       }
     },
     [game, me, updateGame]
   );
 
   const endTurnDisabled = useMemo(() => {
-    if (turn.state.player.id === me?.id) {
+    if (turn.state.playerId === me?.id) {
       return !turn.canEnd();
     } else {
       return true;
@@ -60,24 +60,52 @@ export const Game: FC<GameProps> = (props) => {
 
   const endTurn = useCallback(() => {
     if (me != null) {
-      updateGame(game.endTurn(me));
+      updateGame(game.endTurn(me.id));
     }
   }, [game, me, updateGame]);
+
+  const onBuy = useCallback(
+    (marker: Marker) => {
+      if (me != null) {
+        updateGame(game.buyStock(me.id, marker));
+      }
+    },
+    [game, me, updateGame]
+  );
+
+  const onSell = useCallback(
+    (marker: Marker) => {
+      if (me != null) {
+        updateGame(game.sellStock(me.id, marker));
+      }
+    },
+    [game, me, updateGame]
+  );
 
   return (
     <div className="Game">
       <Board game={game} placeMarker={placeMarker} />
 
       <div className="Prices">
-        <Price marker="blue" price={bluePrice} />
-        <Price marker="purple" price={purplePrice} />
-        <Price marker="yellow" price={yellowPrice} />
-        <Price marker="red" price={redPrice} />
+        <Price marker="blue" price={bluePrice} onBuy={onBuy} onSell={onSell} />
+        <Price
+          marker="purple"
+          price={purplePrice}
+          onBuy={onBuy}
+          onSell={onSell}
+        />
+        <Price
+          marker="yellow"
+          price={yellowPrice}
+          onBuy={onBuy}
+          onSell={onSell}
+        />
+        <Price marker="red" price={redPrice} onBuy={onBuy} onSell={onSell} />
       </div>
 
       <div className="Players">
         {players.map((player) => {
-          const isActive = player.id === turn.state.player.id;
+          const isActive = player.id === turn.state.playerId;
           return (
             <div
               className={isActive ? "Player Player-active" : "Player"}
@@ -91,7 +119,6 @@ export const Game: FC<GameProps> = (props) => {
       </div>
 
       <div className="Turn">
-        {JSON.stringify(turn)}
         <button
           className="EndTurn"
           disabled={endTurnDisabled}

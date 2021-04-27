@@ -14,7 +14,7 @@
 }
 
 .Prices > .Price ~ .Price {
-  margin-top: 4px;
+  margin-top: 8px;
 }
 
 .Players {

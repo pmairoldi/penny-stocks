@@ -31,12 +31,14 @@ export interface Game {
   state: GameState;
   id: string;
   placeMarker: (
-    player: Player,
+    playerId: string,
     row: number,
     column: number,
     modifier?: Modifier
   ) => Game;
-  endTurn: (player: Player) => Game;
+  endTurn: (playerId: string) => Game;
+  buyStock: (playerId: string, marker: Marker) => Game;
+  sellStock: (playerId: string, marker: Marker) => Game;
   addPlayer: (player: Player) => Game;
   removePlayer: (player: Player) => Game;
 }
@@ -126,7 +128,7 @@ function createMarkers(): Marker[] {
 
 const placeMarker = (state: GameState) => {
   return (
-    player: Player,
+    playerId: string,
     row: number,
     column: number,
     modifier?: Modifier
@@ -134,7 +136,7 @@ const placeMarker = (state: GameState) => {
     const { turn, board, prices, players } = state;
     const { state: turnState } = turn;
 
-    if (turnState.player.id !== player.id) {
+    if (turnState.playerId !== playerId) {
       return gameFromState(state);
     }
 
@@ -197,13 +199,13 @@ const placeMarker = (state: GameState) => {
 };
 
 const endTurn = (state: GameState) => {
-  return (player: Player): Game => {
+  return (playerId: string): Game => {
     const { turn, players, markers } = state;
-    if (turn.state.player.id !== player.id) {
+    if (turn.state.playerId !== playerId) {
       return gameFromState(state);
     }
 
-    const playerIndex = players.findIndex((p) => p.id === player.id);
+    const playerIndex = players.findIndex((p) => p.id === playerId);
 
     const activePlayer =
       playerIndex === players.length - 1
@@ -221,6 +223,87 @@ const endTurn = (state: GameState) => {
       ...state,
       turn: nextTurn,
       markers: nextMarkers,
+    };
+
+    return gameFromState(updated);
+  };
+};
+
+const buyStock = (state: GameState) => {
+  return (playerId: string, marker: Marker): Game => {
+    const { turn, players } = state;
+    if (turn.state.playerId !== playerId) {
+      return gameFromState(state);
+    }
+
+    if (!turn.canMakeTrade()) {
+      return gameFromState(state);
+    }
+
+    const player = players.find((p) => p.id === playerId);
+    if (player == null) {
+      return gameFromState(state);
+    }
+
+    const { prices } = state;
+    const price = prices.state[marker];
+    if (player.state.money < price.value) {
+      return gameFromState(state);
+    }
+
+    const updatedPlayers = players.map((p) => {
+      if (p.id === turn.state.playerId) {
+        return p.buy(marker, price.value);
+      } else {
+        return p;
+      }
+    });
+
+    const updated = {
+      ...state,
+      players: updatedPlayers,
+      turn: state.turn.makeTrade(),
+    };
+
+    return gameFromState(updated);
+  };
+};
+
+const sellStock = (state: GameState) => {
+  return (playerId: string, marker: Marker): Game => {
+    const { turn, players } = state;
+    if (turn.state.playerId !== playerId) {
+      return gameFromState(state);
+    }
+
+    if (!turn.canMakeTrade()) {
+      return gameFromState(state);
+    }
+
+    const player = players.find((p) => p.id === playerId);
+    if (player == null) {
+      return gameFromState(state);
+    }
+
+    const { prices } = state;
+    const price = prices.state[marker];
+
+    if (player.state.stocks[marker] < 1) {
+      return gameFromState(state);
+    }
+
+    const updatedPlayers = players.map((p) => {
+      if (p.id === turn.state.playerId) {
+        return p.sell(marker, price.value);
+      } else {
+        return p;
+      }
+    });
+
+    const updated = {
+      ...state,
+      players: updatedPlayers,
+      turn: state.turn.makeTrade(),
     };
 
     return gameFromState(updated);
@@ -276,6 +359,8 @@ export function gameFromState(state: GameState): Game {
     id: state.id,
     placeMarker: placeMarker(state),
     endTurn: endTurn(state),
+    buyStock: buyStock(state),
+    sellStock: sellStock(state),
     addPlayer: addPlayer(state),
     removePlayer: removePlayer(state),
   };

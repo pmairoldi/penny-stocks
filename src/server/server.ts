@@ -1,4 +1,4 @@
-import { Game, GameDTO, gameFromJSON, jsonFromGame, Player } from "../model";
+import { Game, Player } from "../model";
 
 export interface Session {
   me: Player;
@@ -17,14 +17,6 @@ export type Join = (
   name: string,
   onUpdate: (game: Game) => void
 ) => Promise<Session>;
-
-export function parseGame(json: string): Game {
-  return gameFromJSON(JSON.parse(json));
-}
-
-export function mapGame(game: Game): GameDTO {
-  return jsonFromGame(game);
-}
 
 export interface Server {
   create: Create;

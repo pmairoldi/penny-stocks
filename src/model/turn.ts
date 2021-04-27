@@ -1,17 +1,20 @@
 import { Marker } from "./marker";
-import { jsonFromPlayer, Player, PlayerDTO, playerFromJSON } from "./player";
+import { Player } from "./player";
 import { shuffle } from "./utils";
 
 interface TurnState {
-  player: Player;
+  playerId: string;
   markers: Marker[];
   marker: Marker | null;
+  tradesRemaining: number;
 }
 
 export interface Turn {
   state: TurnState;
   updateMarker(markers: Marker[]): Turn;
   canEnd: () => boolean;
+  makeTrade: () => Turn;
+  canMakeTrade: () => boolean;
 }
 
 function pick<T>(array: T[]): { item: T; remaining: T[] } | null {
@@ -32,9 +35,10 @@ export function createTurn(
   if (firstPick == null) {
     return {
       turn: turnFromState({
-        player: player,
+        playerId: player.id,
         markers: turnMarkers,
         marker: turnMarkers.length > 0 ? turnMarkers[0] : null,
+        tradesRemaining: 2,
       }),
       markers: [],
     };
@@ -46,9 +50,10 @@ export function createTurn(
   if (secondPick == null) {
     return {
       turn: turnFromState({
-        player: player,
+        playerId: player.id,
         markers: turnMarkers,
         marker: turnMarkers.length > 0 ? turnMarkers[0] : null,
+        tradesRemaining: 2,
       }),
       markers: [],
     };
@@ -60,9 +65,10 @@ export function createTurn(
   if (thirdPick == null) {
     return {
       turn: turnFromState({
-        player: player,
+        playerId: player.id,
         markers: turnMarkers,
         marker: turnMarkers.length > 0 ? turnMarkers[0] : null,
+        tradesRemaining: 2,
       }),
       markers: [],
     };
@@ -72,9 +78,10 @@ export function createTurn(
 
   return {
     turn: turnFromState({
-      player: player,
+      playerId: player.id,
       markers: turnMarkers,
       marker: turnMarkers[0],
+      tradesRemaining: 2,
     }),
     markers: thirdPick.remaining,
   };
@@ -98,25 +105,46 @@ const canEnd = (state: TurnState) => {
   };
 };
 
+const makeTrade = (state: TurnState) => {
+  return () => {
+    const updated: TurnState = {
+      ...state,
+      tradesRemaining: Math.max(0, state.tradesRemaining - 1),
+    };
+
+    return turnFromState(updated);
+  };
+};
+
+const canMakeTrade = (state: TurnState) => {
+  return () => {
+    return state.tradesRemaining > 0;
+  };
+};
+
 export function turnFromState(state: TurnState): Turn {
   return {
     state: state,
     updateMarker: updateMarker(state),
     canEnd: canEnd(state),
+    makeTrade: makeTrade(state),
+    canMakeTrade: canMakeTrade(state),
   };
 }
 
 export interface TurnDTO {
-  player: PlayerDTO;
+  playerId: string;
   markers: Marker[];
   marker: Marker | null;
+  tradesRemaining: number;
 }
 
 export function turnFromJSON(json: TurnDTO): Turn {
   const state: TurnState = {
-    player: playerFromJSON(json.player),
+    playerId: json.playerId,
     markers: json.markers,
     marker: json.marker,
+    tradesRemaining: json.tradesRemaining,
   };
 
   return turnFromState(state);
@@ -124,8 +152,9 @@ export function turnFromJSON(json: TurnDTO): Turn {
 
 export function jsonFromTurn(turn: Turn): TurnDTO {
   return {
-    player: jsonFromPlayer(turn.state.player),
+    playerId: turn.state.playerId,
     markers: turn.state.markers,
     marker: turn.state.marker,
+    tradesRemaining: turn.state.tradesRemaining,
   };
 }

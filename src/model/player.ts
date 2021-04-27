@@ -17,6 +17,8 @@ export interface Player {
   name: string;
   crash: (marker: Marker, price: number) => Player;
   payday: (marker: Marker, price: number) => Player;
+  buy: (marker: Marker, price: number) => Player;
+  sell: (marker: Marker, price: number) => Player;
 }
 
 const crash = (state: PlayerState) => {
@@ -43,6 +45,42 @@ const payday = (state: PlayerState) => {
   };
 };
 
+const buy = (state: PlayerState) => {
+  return (marker: Marker, price: number) => {
+    const { money, stocks } = state;
+
+    const updatedMoney = money - price;
+    const updatedStocks = { ...stocks };
+    updatedStocks[marker] = updatedStocks[marker] + 1;
+
+    const updated = {
+      ...state,
+      money: updatedMoney,
+      stocks: updatedStocks,
+    };
+
+    return playerFromState(updated);
+  };
+};
+
+const sell = (state: PlayerState) => {
+  return (marker: Marker, price: number) => {
+    const { money, stocks } = state;
+
+    const updatedMoney = money + price;
+    const updatedStocks = { ...stocks };
+    updatedStocks[marker] = updatedStocks[marker] - 1;
+
+    const updated = {
+      ...state,
+      money: updatedMoney,
+      stocks: updatedStocks,
+    };
+
+    return playerFromState(updated);
+  };
+};
+
 export function createPlayer(id: string, name: string): Player {
   const state: PlayerState = {
     id: id,
@@ -61,6 +99,8 @@ export function playerFromState(state: PlayerState): Player {
     name: state.name,
     crash: crash(state),
     payday: payday(state),
+    buy: buy(state),
+    sell: sell(state),
   };
 }
 

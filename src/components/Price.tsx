@@ -1,14 +1,16 @@
-import { FC, useMemo } from "react";
+import { FC, useCallback, useMemo } from "react";
 import { Marker, Price as PriceModel, valueFromRawValue } from "../model";
 import "./Price.css";
 
 interface PriceProps {
   marker: Marker;
   price: PriceModel;
+  onBuy: (marker: Marker) => void;
+  onSell: (marker: Marker) => void;
 }
 
 export const Price: FC<PriceProps> = (props) => {
-  const { marker, price } = props;
+  const { marker, price, onBuy, onSell } = props;
 
   const min = useMemo(() => {
     return price.min;
@@ -34,9 +36,21 @@ export const Price: FC<PriceProps> = (props) => {
     return `Price Price-${marker}`;
   }, [marker]);
 
+  const buy = useCallback(() => {
+    onBuy(marker);
+  }, [onBuy, marker]);
+
+  const sell = useCallback(() => {
+    onSell(marker);
+  }, [onSell, marker]);
+
   return (
     <div className={className}>
-      {marker}
+      <div className="Price-header">
+        <span>{marker}</span>
+        <button onClick={buy}>Buy</button>
+        <button onClick={sell}>Sell</button>
+      </div>
       <div className="Price-bar">
         {prices.map((price, index) => {
           return (

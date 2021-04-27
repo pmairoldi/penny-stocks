@@ -1,25 +1,31 @@
-import { createGame, createPlayer, Game } from "../model";
-import { mapGame, parseGame, Server } from "./server";
+import {
+  createGame,
+  createPlayer,
+  Game,
+  gameFromJSON,
+  jsonFromGame,
+} from "../model";
+import { Server } from "./server";
 
 const local = (id: string, onUpdate: (game: Game) => void) => {
   const storageKey = `penny-stock.${id}`;
 
   const stroageUpdate = (event: StorageEvent) => {
     if (event.newValue != null) {
-      onUpdate(parseGame(event.newValue));
+      onUpdate(gameFromJSON(JSON.parse(event.newValue)));
     }
   };
 
   window.addEventListener("storage", stroageUpdate);
 
   const update = (game: Game) => {
-    const json = mapGame(game);
+    const json = jsonFromGame(game);
     localStorage.setItem(storageKey, JSON.stringify(json));
     onUpdate(game);
   };
 
   const json = localStorage.getItem(storageKey);
-  const game = json != null ? parseGame(json) : null;
+  const game = json != null ? gameFromJSON(JSON.parse(json)) : null;
 
   return {
     game: game,
