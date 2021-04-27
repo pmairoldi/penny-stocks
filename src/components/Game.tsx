@@ -1,7 +1,13 @@
 import { FC, useCallback, useMemo } from "react";
-import { Game as GameModel, Marker, Modifier, Player } from "../model";
+import {
+  Game as GameModel,
+  Marker as MarkerModel,
+  Modifier,
+  Player,
+} from "../model";
 import { Board } from "./Board";
 import "./Game.css";
+import { Marker } from "./Marker";
 import { Price } from "./Price";
 
 interface GameProps {
@@ -65,7 +71,7 @@ export const Game: FC<GameProps> = (props) => {
   }, [game, me, updateGame]);
 
   const onBuy = useCallback(
-    (marker: Marker) => {
+    (marker: MarkerModel) => {
       if (me != null) {
         updateGame(game.buyStock(me.id, marker));
       }
@@ -74,7 +80,7 @@ export const Game: FC<GameProps> = (props) => {
   );
 
   const onSell = useCallback(
-    (marker: Marker) => {
+    (marker: MarkerModel) => {
       if (me != null) {
         updateGame(game.sellStock(me.id, marker));
       }
@@ -119,6 +125,14 @@ export const Game: FC<GameProps> = (props) => {
       </div>
 
       <div className="Turn">
+        {me.id === turn.state.playerId ? (
+          <>
+            <span className="Trades">Trades:{turn.state.tradesRemaining}</span>
+            {turn.state.markers.map((m) => {
+              return <Marker marker={m} />;
+            })}
+          </>
+        ) : null}
         <button
           className="EndTurn"
           disabled={endTurnDisabled}

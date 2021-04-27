@@ -35,6 +35,21 @@
   position: absolute;
   bottom: 10px;
   right: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.Turn .Trades ~ .Marker {
+  margin-left: 10px;
+}
+
+.Turn .Marker ~ .Marker {
+  margin-left: 4px;
+}
+
+.Turn .Trades ~ .EndTurn,
+.Turn .Marker ~ .EndTurn {
+  margin-left: 10px;
 }
 
 .EndTurn {
