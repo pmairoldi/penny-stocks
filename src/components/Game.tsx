@@ -128,8 +128,8 @@ export const Game: FC<GameProps> = (props) => {
         {me.id === turn.state.playerId ? (
           <>
             <span className="Trades">Trades:{turn.state.tradesRemaining}</span>
-            {turn.state.markers.map((m) => {
-              return <Marker marker={m} />;
+            {turn.state.markers.map((m, index) => {
+              return <Marker key={`${m}-${index}`} marker={m} />;
             })}
           </>
         ) : null}
