@@ -9,7 +9,7 @@ import {
 } from "../model";
 import { Server } from "./server";
 
-const URL = "http://localhost:5000";
+const URL = "https://penny-stocks.herokuapp.com/";
 const socket = io(URL, { autoConnect: false });
 
 socket.onAny((event, ...args) => {
