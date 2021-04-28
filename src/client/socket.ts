@@ -13,6 +13,9 @@ const URL =
   process.env.NODE_ENV === "development"
     ? "http://localhost:5000"
     : "https://penny-stocks.herokuapp.com/";
+
+console.log(URL);
+
 const socket = io(URL, { autoConnect: false });
 
 socket.onAny((event, ...args) => {
