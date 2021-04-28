@@ -28,7 +28,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "prepare": "husky install",
-    "deploy-server": "git subtree push --prefix server heroku main"
+    "deploy-server": "git subtree push --prefix src/server heroku main"
   },
   "eslintConfig": {
     "extends": [

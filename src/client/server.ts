@@ -1,4 +1,4 @@
-import { Game, Player } from "../model";
+import { Game, Player } from "../server/model";
 
 export interface Session {
   me: Player;

@@ -1,5 +1,5 @@
 import { FC, useMemo } from "react";
-import { Marker as MarkerModel } from "../model";
+import { Marker as MarkerModel } from "../server/model";
 import "./Marker.css";
 
 interface MarkerProps {

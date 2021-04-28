@@ -1,5 +1,9 @@
 import { FC, useCallback, useMemo } from "react";
-import { Marker, Price as PriceModel, valueFromRawValue } from "../model";
+import {
+  Marker,
+  Price as PriceModel,
+  valueFromRawValue,
+} from "../server/model";
 import "./Price.css";
 
 interface PriceProps {

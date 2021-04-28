@@ -6,10 +6,13 @@ import {
   jsonFromGame,
   PlayerDTO,
   playerFromJSON,
-} from "../model";
+} from "../server/model";
 import { Server } from "./server";
 
-const URL = "https://penny-stocks.herokuapp.com/";
+const URL =
+  process.env.NODE_ENV === "development"
+    ? "http://localhost:5000"
+    : "https://penny-stocks.herokuapp.com/";
 const socket = io(URL, { autoConnect: false });
 
 socket.onAny((event, ...args) => {

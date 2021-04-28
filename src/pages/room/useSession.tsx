@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
-import { Game } from "../../model";
-import { server, Session } from "../../server";
+import { Game } from "../../server/model";
+import { server, Session } from "../../client";
 
 export interface UseSessionValue {
   session: Session | undefined;

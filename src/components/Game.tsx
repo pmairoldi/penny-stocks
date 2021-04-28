@@ -4,7 +4,7 @@ import {
   Marker as MarkerModel,
   Modifier,
   Player,
-} from "../model";
+} from "../server/model";
 import { Board } from "./Board";
 import "./Game.css";
 import { Marker } from "./Marker";

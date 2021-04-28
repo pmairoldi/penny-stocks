@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useMemo } from "react";
-import { Marker as MarkerModel, Modifier } from "../model";
+import { Marker as MarkerModel, Modifier } from "../server/model";
 import { Marker } from "./Marker";
 import "./Tile.css";
 

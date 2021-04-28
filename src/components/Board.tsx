@@ -1,6 +1,6 @@
 import { FC, useCallback, useMemo } from "react";
-import { Modifier } from "../model";
-import { Game } from "../model/game";
+import { Modifier } from "../server/model";
+import { Game } from "../server/model/game";
 import "./Board.css";
 import { DefaultTile, ModifierTile, StartTile } from "./Tile";
 

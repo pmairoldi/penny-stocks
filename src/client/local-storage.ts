@@ -4,7 +4,7 @@ import {
   Game,
   gameFromJSON,
   jsonFromGame,
-} from "../model";
+} from "../server/model";
 import { Server } from "./server";
 
 const local = (id: string, onUpdate: (game: Game) => void) => {
