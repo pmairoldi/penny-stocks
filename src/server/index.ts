@@ -83,7 +83,11 @@ io.on("connection", (socket) => {
       if (player != null) {
         const updated = game.removePlayer(player);
 
-        games.set(id, updated);
+        if (updated.state.players.length > 0) {
+          games.set(id, updated);
+        } else {
+          games.delete(id);
+        }
 
         socket.broadcast.emit("update", jsonFromGame(updated));
       }
