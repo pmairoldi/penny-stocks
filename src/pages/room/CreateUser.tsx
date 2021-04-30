@@ -58,7 +58,7 @@ export const CreateUser: FC<Props> = (props) => {
           onChange={onNameChange}
         />
         <LargeButton onClick={onCreateUser} disabled={disabledCreateButton}>
-          Create
+          {id == null ? <>Create</> : <>Join</>}
         </LargeButton>
       </CreateUserContainer>
     );

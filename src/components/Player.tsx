@@ -30,6 +30,8 @@ const PlayerName = styled.div`
   span:first-child {
     flex: 1;
     font-weight: bold;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 `;
 

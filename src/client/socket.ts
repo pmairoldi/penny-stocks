@@ -53,7 +53,7 @@ export const server: Server = {
     });
   },
   join: (id, name, onUpdate) => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, rejects) => {
       socket.auth = { username: name };
       socket.connect();
 
@@ -76,6 +76,10 @@ export const server: Server = {
 
       socket.on("update", (dto: GameDTO) => {
         onUpdate(gameFromJSON(dto));
+      });
+
+      socket.on("not found", () => {
+        rejects("NO GAME");
       });
 
       socket.emit("join", { id: id });

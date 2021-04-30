@@ -9,7 +9,7 @@ export interface UseSessionValue {
   join: (id: string, name: string) => void;
 }
 
-export function useSession(): UseSessionValue {
+export function useSession(notFound: () => void): UseSessionValue {
   const [session, setSession] = useState<Session>();
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -33,12 +33,13 @@ export function useSession(): UseSessionValue {
         })
         .catch(() => {
           setSession(undefined);
+          notFound();
         })
         .finally(() => {
           setLoading(false);
         });
     },
-    [setSession, setLoading, onUpdate]
+    [setSession, setLoading, onUpdate, notFound]
   );
 
   const join = useCallback(
@@ -51,12 +52,13 @@ export function useSession(): UseSessionValue {
         })
         .catch(() => {
           setSession(undefined);
+          notFound();
         })
         .finally(() => {
           setLoading(false);
         });
     },
-    [setSession, setLoading, onUpdate]
+    [setSession, setLoading, onUpdate, notFound]
   );
 
   return { session, loading, create: create, join: join };
