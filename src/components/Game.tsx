@@ -28,7 +28,8 @@ const GameContainer = styled.div`
 const PlayContainer = styled.div`
   display: flex;
   flex-direction: row;
-  flex: 1;
+  width: 100%;
+  height: 100%;
 `;
 
 const StyledBoard = styled(Board)`
@@ -50,6 +51,7 @@ const DataContainer = styled.div`
 
 const PricesContainer = styled.div`
   flex: 1;
+  overflow: auto;
 
   > * ~ * {
     margin-top: 8px;

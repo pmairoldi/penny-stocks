@@ -1,5 +1,6 @@
-import { FC, useCallback, useEffect, useRef, useState } from "react";
+import { FC, useCallback, useRef, useState } from "react";
 import styled from "styled-components";
+import { useEventListener } from "../hooks";
 import { Button } from "./Button";
 
 interface PayersDropdownProps {}
@@ -15,6 +16,8 @@ const DropdownContent = styled.div`
   top: 38px;
   background: transparent;
   width: 260px;
+  overflow: auto;
+  max-height: calc(100vh - 130px);
 `;
 
 export const PlayersDropdown: FC<PayersDropdownProps> = (props) => {
@@ -49,13 +52,7 @@ export const PlayersDropdown: FC<PayersDropdownProps> = (props) => {
     [toggleRef, contentRef, opened, setOpen]
   );
 
-  useEffect(() => {
-    window.addEventListener("click", onOutsideClick);
-
-    return () => {
-      window.removeEventListener("click", onOutsideClick);
-    };
-  }, [onOutsideClick]);
+  useEventListener("click", onOutsideClick);
 
   return (
     <Dropdown>

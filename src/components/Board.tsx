@@ -1,5 +1,6 @@
-import { FC, useCallback, useMemo } from "react";
+import React, { FC, useCallback, useMemo, useRef } from "react";
 import styled from "styled-components";
+import { useScale } from "../hooks";
 import { Modifier } from "../server/model";
 import { Game } from "../server/model/game";
 import { DefaultTile, ModifierTile, StartTile } from "./Tile";
@@ -9,7 +10,7 @@ interface BoardProps {
   placeMarker: (row: number, column: number, modifier?: Modifier) => void;
 }
 
-const BoardContainer = styled.div`
+const BoardContainer = styled.div<{ scale: number }>`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -19,6 +20,10 @@ const BoardContainer = styled.div`
   > * ~ * {
     margin-top: 8px;
   }
+
+  position: relative;
+  transform-origin: center center;
+  transform: ${(props) => (props.scale < 1 ? `scale(${props.scale})` : null)};
 `;
 
 const BoardRow = styled.div`
@@ -32,6 +37,9 @@ const BoardRow = styled.div`
 
 export const Board: FC<BoardProps & { className?: string }> = (props) => {
   const { className, game, placeMarker } = props;
+
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  const scale = useScale(876, 972, contentRef.current);
 
   const state = useMemo(() => {
     return game.state;
@@ -49,7 +57,7 @@ export const Board: FC<BoardProps & { className?: string }> = (props) => {
   );
 
   return (
-    <BoardContainer className={className}>
+    <BoardContainer className={className} ref={contentRef} scale={scale}>
       {board.state.rows.map((row, index) => {
         return (
           <BoardRow key={`row-${index}`}>
