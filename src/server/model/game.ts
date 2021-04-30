@@ -329,13 +329,36 @@ const addPlayer = (state: GameState) => {
 
 const removePlayer = (state: GameState) => {
   return (player: Player): Game => {
-    const { players } = state;
+    const { players, turn, markers } = state;
 
-    const updated: GameState = {
-      ...state,
-      players: players.filter((p) => p.id !== player.id),
-    };
-    return gameFromState(updated);
+    const index = players.findIndex((p) => p.id === player.id);
+
+    if (turn.state.playerId === player.id) {
+      const updatedMarkers =
+        turn.state.playerId === player.id
+          ? markers.concat(turn.state.markers)
+          : markers;
+
+      const nextPlayer =
+        index + 1 >= players.length ? players[0] : players[index + 1];
+
+      const updatedTurn = createTurn(nextPlayer, updatedMarkers);
+      const updated: GameState = {
+        ...state,
+        players: players.filter((p) => p.id !== player.id),
+        turn: updatedTurn.turn,
+        markers: updatedTurn.markers,
+      };
+
+      return gameFromState(updated);
+    } else {
+      const updated: GameState = {
+        ...state,
+        players: players.filter((p) => p.id !== player.id),
+      };
+
+      return gameFromState(updated);
+    }
   };
 };
 

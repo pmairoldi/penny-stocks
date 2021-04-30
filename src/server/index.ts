@@ -5,6 +5,7 @@ import {
   createPlayer,
   Game,
   GameDTO,
+  gameFromJSON,
   jsonFromGame,
   jsonFromPlayer,
 } from "./model";
@@ -52,6 +53,8 @@ io.on("connection", (socket) => {
     } else {
       const updated = game.addPlayer(me);
 
+      games.set(id, updated);
+
       socket.emit("start", {
         me: jsonFromPlayer(me),
         game: jsonFromGame(updated),
@@ -61,13 +64,31 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("update", (game: GameDTO) => {
-    socket.emit("update", game);
-    socket.broadcast.emit("update", game);
+  socket.on("update", (dto: GameDTO) => {
+    const id = dto.id;
+    const game = games.get(dto.id);
+
+    if (game != null) {
+      games.set(id, gameFromJSON(dto));
+    }
+
+    socket.emit("update", dto);
+    socket.broadcast.emit("update", dto);
   });
 
   // notify users upon disconnection
   socket.on("disconnect", () => {
+    Array.from(games.entries()).forEach(([id, game]) => {
+      const player = game.state.players.find((p) => p.id === socket.id);
+      if (player != null) {
+        const updated = game.removePlayer(player);
+
+        games.set(id, updated);
+
+        socket.broadcast.emit("update", jsonFromGame(updated));
+      }
+    });
+
     socket.broadcast.emit("user disconnected", socket.id);
   });
 });
