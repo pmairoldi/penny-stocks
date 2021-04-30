@@ -1,7 +1,7 @@
 import { FC, useCallback, useMemo } from "react";
+import styled from "styled-components";
 import { Modifier } from "../server/model";
 import { Game } from "../server/model/game";
-import "./Board.css";
 import { DefaultTile, ModifierTile, StartTile } from "./Tile";
 
 interface BoardProps {
@@ -9,8 +9,29 @@ interface BoardProps {
   placeMarker: (row: number, column: number, modifier?: Modifier) => void;
 }
 
-export const Board: FC<BoardProps> = (props) => {
-  const { game, placeMarker } = props;
+const BoardContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+
+  > * ~ * {
+    margin-top: 8px;
+  }
+`;
+
+const BoardRow = styled.div`
+  display: flex;
+  flex-direction: row;
+
+  > * ~ * {
+    margin-left: 8px;
+  }
+`;
+
+export const Board: FC<BoardProps & { className?: string }> = (props) => {
+  const { className, game, placeMarker } = props;
 
   const state = useMemo(() => {
     return game.state;
@@ -28,10 +49,10 @@ export const Board: FC<BoardProps> = (props) => {
   );
 
   return (
-    <div className="Board">
+    <BoardContainer className={className}>
       {board.state.rows.map((row, index) => {
         return (
-          <div className="Board-row" key={`row-${index}`}>
+          <BoardRow key={`row-${index}`}>
             {row.map((tile) => {
               switch (tile.type) {
                 case "default":
@@ -68,9 +89,9 @@ export const Board: FC<BoardProps> = (props) => {
                   return null;
               }
             })}
-          </div>
+          </BoardRow>
         );
       })}
-    </div>
+    </BoardContainer>
   );
 };

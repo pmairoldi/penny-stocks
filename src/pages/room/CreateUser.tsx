@@ -1,10 +1,25 @@
 import { ChangeEvent, FC, useCallback, useMemo, useState } from "react";
+import styled from "styled-components";
+import { LargeButton, Input } from "../../components";
 import { UseSessionValue } from "./useSession";
 
 interface Props {
   id: string | undefined;
   server: UseSessionValue;
 }
+
+const CreateUserContainer = styled.div`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  > * ~ * {
+    margin-top: 16px;
+  }
+`;
 
 export const CreateUser: FC<Props> = (props) => {
   const { id, server } = props;
@@ -32,15 +47,20 @@ export const CreateUser: FC<Props> = (props) => {
   }, [id, name, create, join]);
 
   if (loading) {
-    return <div>Creating</div>;
+    return <CreateUserContainer>Creating</CreateUserContainer>;
   } else {
     return (
-      <div>
-        <input type="text" value={name} onChange={onNameChange} />
-        <button onClick={onCreateUser} disabled={disabledCreateButton}>
+      <CreateUserContainer>
+        <Input
+          type="text"
+          value={name}
+          placeholder="username"
+          onChange={onNameChange}
+        />
+        <LargeButton onClick={onCreateUser} disabled={disabledCreateButton}>
           Create
-        </button>
-      </div>
+        </LargeButton>
+      </CreateUserContainer>
     );
   }
 };

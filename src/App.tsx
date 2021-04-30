@@ -1,11 +1,18 @@
 import { FC } from "react";
-import { Route, Switch } from "react-router-dom";
-import "./App.css";
+import { Redirect, Route, Switch } from "react-router-dom";
+import styled from "styled-components";
 import { Home, Room } from "./pages";
+
+const AppContainer = styled.div`
+  position: relative;
+  height: 100%;
+  width: 100%;
+  background: #e4dfda;
+`;
 
 const App: FC = () => {
   return (
-    <div className="App">
+    <AppContainer>
       <Switch>
         <Route exact path="/">
           <Home />
@@ -16,9 +23,11 @@ const App: FC = () => {
         <Route path="/room/:id">
           <Room />
         </Route>
-        <Route path="*">{404}</Route>
+        <Route path="*">
+          <Redirect to="/" />
+        </Route>
       </Switch>
-    </div>
+    </AppContainer>
   );
 };
 
