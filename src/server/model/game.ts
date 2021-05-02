@@ -25,6 +25,7 @@ interface GameState {
   players: Player[];
   markers: Marker[];
   turn: Turn;
+  gameover: boolean;
 }
 
 export interface Game {
@@ -186,12 +187,17 @@ const placeMarker = (state: GameState) => {
 
     const updateMarkers = turnState.markers.slice(1);
 
+    const gameover = !updatedBoard.hasActionTilesRemaining();
+    if (gameover) {
+    }
+
     const updated: GameState = {
       ...state,
       board: updatedBoard,
       prices: updatedPrices,
       players: updatedPlayers,
       turn: turn.updateMarker(updateMarkers),
+      gameover: gameover,
     };
 
     return gameFromState(updated);
@@ -371,6 +377,7 @@ export function createGame(id: string, players: Player[]): Game {
     players: players,
     markers: markers,
     turn: turn,
+    gameover: false,
   };
 
   return gameFromState(state);
@@ -396,6 +403,7 @@ export interface GameDTO {
   players: PlayerDTO[];
   markers: Marker[];
   turn: TurnDTO;
+  gameover: boolean;
 }
 
 export function gameFromJSON(json: GameDTO): Game {
@@ -406,6 +414,7 @@ export function gameFromJSON(json: GameDTO): Game {
     players: json.players.map((p) => playerFromJSON(p)),
     markers: json.markers,
     turn: turnFromJSON(json.turn),
+    gameover: json.gameover,
   };
 
   return gameFromState(state);
@@ -419,5 +428,6 @@ export function jsonFromGame(game: Game): GameDTO {
     players: game.state.players.map((p) => jsonFromPlayer(p)),
     markers: game.state.markers,
     turn: jsonFromTurn(game.state.turn),
+    gameover: game.state.gameover,
   };
 }

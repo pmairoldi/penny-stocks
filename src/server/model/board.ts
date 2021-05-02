@@ -14,6 +14,7 @@ export interface Board {
     column: number,
     callback: (tile: Tile) => Tile
   ) => Board;
+  hasActionTilesRemaining: () => boolean;
 }
 
 const countForRow = (row: number) => {
@@ -156,6 +157,29 @@ const updateTile = (state: BoardState) => {
   };
 };
 
+const hasActionTilesRemaining = (state: BoardState) => {
+  return () => {
+    const { rows } = state;
+    const actionsTiles = rows.reduce((acc, elem) => {
+      const tiles = elem.filter((e) => {
+        if (
+          e.type === "modifier" &&
+          (e.modifier === "crash" || e.modifier === "payday")
+        ) {
+          return e.marker == null;
+        } else {
+          return false;
+        }
+      });
+
+      return acc.concat(...tiles);
+    }, new Array<Tile>());
+
+    console.log(actionsTiles);
+    return actionsTiles.length > 0;
+  };
+};
+
 export function createBoard(): Board {
   const modifiers = createModifers();
   const getModifier = (): Modifier => {
@@ -185,6 +209,7 @@ export function boardFromState(state: BoardState): Board {
   return {
     state: state,
     updateTile: updateTile(state),
+    hasActionTilesRemaining: hasActionTilesRemaining(state),
   };
 }
 
@@ -200,6 +225,7 @@ export function boardFromJSON(json: BoardDTO): Board {
   return {
     state: state,
     updateTile: updateTile(state),
+    hasActionTilesRemaining: hasActionTilesRemaining(state),
   };
 }
 

@@ -79,6 +79,29 @@ const MarkerCount = styled.div`
   border: 1px solid white;
 `;
 
+const GameOver = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+`;
+
+const GameOverTitle = styled.div`
+  font-size: 6rem;
+  font-weight: bold;
+  color: #c1666b;
+  text-align: center;
+`;
+
+const GameOverPlayers = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const GameOverPlayer = styled.div``;
+
 export const Game: FC<GameProps> = (props) => {
   const { me: sessionPlayer, game, updateGame } = props;
 
@@ -215,60 +238,86 @@ export const Game: FC<GameProps> = (props) => {
     return canSell.yellow;
   }, [canSell]);
 
+  const isGameOver = useMemo(() => {
+    return game.state.gameover;
+  }, [game]);
+
+  const playerScores = useMemo(() => {
+    return game.state.players.map((p) => {
+      const { prices } = game.state;
+      return { id: p.id, name: p.name, score: p.score(prices) };
+    });
+  }, [game]);
+
   return (
     <GameContainer>
-      <PlayContainer>
-        <StyledBoard game={game} placeMarker={placeMarker} />
+      {isGameOver ? (
+        <GameOver>
+          <GameOverTitle>Game Over</GameOverTitle>
+          <GameOverPlayers>
+            {playerScores.map((p) => {
+              return (
+                <GameOverPlayer key={p.id}>
+                  {p.name}: ${p.score}
+                </GameOverPlayer>
+              );
+            })}
+          </GameOverPlayers>
+        </GameOver>
+      ) : (
+        <PlayContainer>
+          <StyledBoard game={game} placeMarker={placeMarker} />
 
-        <DataContainer>
-          <PricesContainer>
-            <Price
-              marker="blue"
-              price={bluePrice}
-              onBuy={onBuy}
-              onSell={onSell}
-              canBuy={canBuyBlue}
-              canSell={canSellBlue}
-            />
-            <Price
-              marker="purple"
-              price={purplePrice}
-              onBuy={onBuy}
-              onSell={onSell}
-              canBuy={canBuyPurple}
-              canSell={canSellPurple}
-            />
-            <Price
-              marker="yellow"
-              price={yellowPrice}
-              onBuy={onBuy}
-              onSell={onSell}
-              canBuy={canBuyYellow}
-              canSell={canSellYellow}
-            />
-            <Price
-              marker="red"
-              price={redPrice}
-              onBuy={onBuy}
-              onSell={onSell}
-              canBuy={canBuyRed}
-              canSell={canSellRed}
-            />
-          </PricesContainer>
+          <DataContainer>
+            <PricesContainer>
+              <Price
+                marker="blue"
+                price={bluePrice}
+                onBuy={onBuy}
+                onSell={onSell}
+                canBuy={canBuyBlue}
+                canSell={canSellBlue}
+              />
+              <Price
+                marker="purple"
+                price={purplePrice}
+                onBuy={onBuy}
+                onSell={onSell}
+                canBuy={canBuyPurple}
+                canSell={canSellPurple}
+              />
+              <Price
+                marker="yellow"
+                price={yellowPrice}
+                onBuy={onBuy}
+                onSell={onSell}
+                canBuy={canBuyYellow}
+                canSell={canSellYellow}
+              />
+              <Price
+                marker="red"
+                price={redPrice}
+                onBuy={onBuy}
+                onSell={onSell}
+                canBuy={canBuyRed}
+                canSell={canSellRed}
+              />
+            </PricesContainer>
 
-          {me == null ? null : (
-            <Player
-              player={me}
-              turn={
-                me?.id === turn.state.playerId ? (
-                  <Turn turn={turn} endTurn={endTurn} />
-                ) : undefined
-              }
-            ></Player>
-          )}
-        </DataContainer>
-      </PlayContainer>
-
+            {me == null ? null : (
+              <Player
+                player={me}
+                turn={
+                  me?.id === turn.state.playerId ? (
+                    <Turn turn={turn} endTurn={endTurn} />
+                  ) : undefined
+                }
+              ></Player>
+            )}
+          </DataContainer>
+          <MarkerCount>{game.state.markers.length}</MarkerCount>
+        </PlayContainer>
+      )}
       <PlayersContainer>
         <PlayersDropdown>
           {players.map((player) => {
@@ -283,8 +332,6 @@ export const Game: FC<GameProps> = (props) => {
           })}
         </PlayersDropdown>
       </PlayersContainer>
-
-      <MarkerCount>{game.state.markers.length}</MarkerCount>
     </GameContainer>
   );
 };

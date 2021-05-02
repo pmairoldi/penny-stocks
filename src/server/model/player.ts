@@ -1,4 +1,5 @@
 import { Marker } from "./marker";
+import { Prices } from "./prices";
 
 type PlayserStocksType = {
   [price in Marker]: number;
@@ -19,6 +20,7 @@ export interface Player {
   payday: (marker: Marker, price: number) => Player;
   buy: (marker: Marker, price: number) => Player;
   sell: (marker: Marker, price: number) => Player;
+  score(prices: Prices): number;
 }
 
 const crash = (state: PlayerState) => {
@@ -81,6 +83,20 @@ const sell = (state: PlayerState) => {
   };
 };
 
+const score = (state: PlayerState) => {
+  return (prices: Prices) => {
+    const { money, stocks } = state;
+
+    const remaining =
+      prices.state.blue.value * stocks.blue +
+      prices.state.red.value * stocks.red +
+      prices.state.yellow.value * stocks.yellow +
+      prices.state.purple.value * stocks.purple;
+
+    return money + remaining;
+  };
+};
+
 export function createPlayer(id: string, name: string): Player {
   const state: PlayerState = {
     id: id,
@@ -101,6 +117,7 @@ export function playerFromState(state: PlayerState): Player {
     payday: payday(state),
     buy: buy(state),
     sell: sell(state),
+    score: score(state),
   };
 }
 

@@ -109,7 +109,7 @@ export const ModifierTile: FC<ModifierTileProps> = (props) => {
       case "crash":
         return "Crash";
       case "payday":
-        return "Payday";
+        return "Dividend";
       case "plus-1":
         return "+1";
       case "plus-2":

@@ -20,6 +20,7 @@ const Logo = styled.div`
   font-size: 6rem;
   font-weight: bold;
   color: #c1666b;
+  text-align: center;
 `;
 
 export const Home: FC = () => {
