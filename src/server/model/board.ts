@@ -1,3 +1,4 @@
+import { Marker } from "./marker";
 import { Modifier } from "./modifier";
 import { Tile } from "./tile";
 import { getRandomItem, removeItem } from "./utils";
@@ -7,13 +8,11 @@ type Row = Tile[];
 interface BoardState {
   rows: Row[];
 }
+
 export interface Board {
   state: BoardState;
-  updateTile: (
-    row: number,
-    column: number,
-    callback: (tile: Tile) => Tile
-  ) => Board;
+  setMarker: (row: number, column: number, marker: Marker) => Board;
+  canPlaceMarker: (row: number, column: number, marker: Marker) => boolean;
   hasActionTilesRemaining: () => boolean;
 }
 
@@ -137,18 +136,101 @@ const createModifers = (): Modifier[] => {
   ];
 };
 
-const updateTile = (state: BoardState) => {
-  return (
-    row: number,
-    column: number,
-    callback: (tile: Tile) => Tile
-  ): Board => {
+const canPlaceMarker = (state: BoardState) => {
+  const validateCurrentRow = (
+    row: Row,
+    columnIndex: number
+  ): (Marker | null)[] => {
+    const markers = new Array<Marker | null>();
+
+    if (columnIndex - 1 >= 0) {
+      const before = row[columnIndex - 1];
+      markers.push(before.marker);
+    }
+
+    if (columnIndex + 1 < row.length) {
+      const after = row[columnIndex + 1];
+      markers.push(after.marker);
+    }
+
+    return markers;
+  };
+
+  const validateBeforeOrAfterRow = (
+    row: Row,
+    columnIndex: number,
+    currentRowSize: number
+  ): (Marker | null)[] => {
+    const markers = new Array<Marker | null>();
+
+    if (row.length < currentRowSize) {
+      if (columnIndex < row.length) {
+        const rowBeforeColumn = row[columnIndex];
+        markers.push(rowBeforeColumn.marker);
+      }
+
+      if (columnIndex - 1 >= 0) {
+        const rowBeforeColumnBefore = row[columnIndex - 1];
+        markers.push(rowBeforeColumnBefore.marker);
+      }
+    } else {
+      if (columnIndex < row.length) {
+        const rowBeforeColumn = row[columnIndex];
+        markers.push(rowBeforeColumn.marker);
+      }
+
+      if (columnIndex + 1 >= 0) {
+        const rowBeforeColumnAfter = row[columnIndex + 1];
+        markers.push(rowBeforeColumnAfter.marker);
+      }
+    }
+
+    return markers;
+  };
+
+  return (row: number, column: number, marker: Marker): boolean => {
+    const markers = new Array<Marker | null>();
+    const currentRow = state.rows[row];
+
+    markers.push(...validateCurrentRow(currentRow, column));
+
+    if (row - 1 >= 0) {
+      const rowBefore = state.rows[row - 1];
+      markers.push(
+        ...validateBeforeOrAfterRow(rowBefore, column, currentRow.length)
+      );
+    }
+
+    if (row + 1 < state.rows.length) {
+      const rowAfter = state.rows[row + 1];
+      markers.push(
+        ...validateBeforeOrAfterRow(rowAfter, column, currentRow.length)
+      );
+    }
+
+    return markers.some((m) => m === marker);
+  };
+};
+
+const updateTileMarker = (tile: Tile, marker: Marker) => {
+  switch (tile.type) {
+    case "default":
+      return { ...tile, marker: marker };
+    case "modifier":
+      return { ...tile, marker: marker };
+    case "start":
+      return { ...tile };
+  }
+};
+
+const setMarker = (state: BoardState) => {
+  return (row: number, column: number, marker: Marker): Board => {
     const { rows } = state;
     const updatedRows = rows.slice();
     const tiles = updatedRows[row].slice();
     const tile = tiles[column];
 
-    tiles[column] = callback({ ...tile });
+    tiles[column] = updateTileMarker(tile, marker);
     updatedRows[row] = tiles;
 
     const updated = { rows: updatedRows };
@@ -190,7 +272,8 @@ export function createBoard(): Board {
     return modifer;
   };
 
-  const rows = new Array<{ tiles: Tile[] }>(13)
+  const rowCount = 13;
+  const rows = new Array<{ tiles: Tile[] }>(rowCount)
     .fill((null as unknown) as { tiles: Tile[] })
     .map((_, row) => {
       const count = countForRow(row);
@@ -208,7 +291,8 @@ export function createBoard(): Board {
 export function boardFromState(state: BoardState): Board {
   return {
     state: state,
-    updateTile: updateTile(state),
+    setMarker: setMarker(state),
+    canPlaceMarker: canPlaceMarker(state),
     hasActionTilesRemaining: hasActionTilesRemaining(state),
   };
 }
@@ -224,7 +308,8 @@ export function boardFromJSON(json: BoardDTO): Board {
 
   return {
     state: state,
-    updateTile: updateTile(state),
+    setMarker: setMarker(state),
+    canPlaceMarker: canPlaceMarker(state),
     hasActionTilesRemaining: hasActionTilesRemaining(state),
   };
 }

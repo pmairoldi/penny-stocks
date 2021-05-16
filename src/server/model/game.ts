@@ -146,18 +146,11 @@ const placeMarker = (state: GameState) => {
     }
 
     const marker = turnState.marker;
-    const updatedBoard = board.updateTile(row, column, (tile) => {
-      switch (tile.type) {
-        case "default":
-          tile.marker = marker;
-          return tile;
-        case "modifier":
-          tile.marker = marker;
-          return tile;
-        case "start":
-          return tile;
-      }
-    });
+    if (!board.canPlaceMarker(row, column, marker)) {
+      return gameFromState(state);
+    }
+
+    const updatedBoard = board.setMarker(row, column, marker);
 
     const pricesUpdate = pricesModifier(modifier);
 

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
-    "start": "ts-node index.ts"
+    "start": "node --nolazy -r ts-node/register index.ts"
   },
   "author": "Pierre-Marc Airoldi",
   "license": "ISC",
