@@ -219,19 +219,23 @@ const endTurn = (state: GameState) => {
         : players[playerIndex + 1];
 
     const next = createTurn(activePlayer, markers);
-
-    if (next == null) {
-      return gameFromState(state);
-    }
-
     const { turn: nextTurn, markers: nextMarkers } = next;
-    const updated: GameState = {
-      ...state,
-      turn: nextTurn,
-      markers: nextMarkers,
-    };
 
-    return gameFromState(updated);
+    if (nextMarkers.length === 0) {
+      const updated: GameState = {
+        ...state,
+        state: "gameover",
+      };
+      return gameFromState(updated);
+    } else {
+      const updated: GameState = {
+        ...state,
+        turn: nextTurn,
+        markers: nextMarkers,
+      };
+
+      return gameFromState(updated);
+    }
   };
 };
 
