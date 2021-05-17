@@ -1,21 +1,21 @@
-import { Action, Game, Player } from "../server/model";
+import { ActionDTO, GameDTO, PlayerDTO } from "../server/dto";
 
 export interface Session {
-  me: Player;
-  game: Game;
-  update: (action: Action) => void;
+  me: PlayerDTO;
+  game: GameDTO;
+  update: (action: ActionDTO) => void;
   cleanup: () => void;
 }
 
 export type Create = (
   name: string,
-  onUpdate: (game: Game) => void
+  onUpdate: (game: GameDTO) => void
 ) => Promise<Session>;
 
 export type Join = (
   gameId: string,
   name: string,
-  onUpdate: (game: Game) => void
+  onUpdate: (game: GameDTO) => void
 ) => Promise<Session>;
 
 export interface Server {

@@ -1,11 +1,11 @@
 import { FC, useCallback, useMemo, useRef } from "react";
 import styled from "styled-components";
 import { useScale } from "../hooks";
-import { Game } from "../server/model/game";
+import { GameDTO } from "../server/dto";
 import { DefaultTile, ModifierTile, StartTile } from "./Tile";
 
 interface BoardProps {
-  game: Game;
+  game: GameDTO;
   placeMarker: (row: number, column: number) => void;
 }
 
@@ -40,13 +40,9 @@ export const Board: FC<BoardProps & { className?: string }> = (props) => {
   const contentRef = useRef<HTMLDivElement | null>(null);
   const scale = useScale(876, 972, contentRef.current);
 
-  const state = useMemo(() => {
-    return game.state;
-  }, [game]);
-
   const board = useMemo(() => {
-    return state.board;
-  }, [state]);
+    return game.board;
+  }, [game]);
 
   const onTileClick = useCallback(
     (row: number, column: number) => {
@@ -57,7 +53,7 @@ export const Board: FC<BoardProps & { className?: string }> = (props) => {
 
   return (
     <BoardContainer className={className} ref={contentRef} scale={scale}>
-      {board.state.rows.map((row, index) => {
+      {board.rows.map((row, index) => {
         return (
           <BoardRow key={`row-${index}`}>
             {row.map((tile) => {

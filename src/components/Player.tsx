@@ -1,10 +1,10 @@
 import { FC, ReactElement } from "react";
 import styled from "styled-components";
-import { Player as PlayerModel } from "../server/model";
+import { PlayerDTO } from "../server/dto";
 import { Marker } from "./Marker";
 
 interface PlayerProps {
-  player: PlayerModel;
+  player: PlayerDTO;
   showMoney: boolean;
   turn?: ReactElement;
   active?: boolean;
@@ -62,18 +62,14 @@ export const Player: FC<PlayerProps> = (props) => {
     <StyledPlayer>
       <PlayerName>
         {active === true ? <>&#10148;</> : null}
-        <span>{player.state.name}</span>
-        {showMoney ? <span>${player.state.money}</span> : null}
+        <span>{player.name}</span>
+        {showMoney ? <span>${player.money}</span> : null}
       </PlayerName>
       <StatsContainer>
-        <PlayerMarker marker="blue">{player.state.stocks.blue}</PlayerMarker>
-        <PlayerMarker marker="purple">
-          {player.state.stocks.purple}
-        </PlayerMarker>
-        <PlayerMarker marker="yellow">
-          {player.state.stocks.yellow}
-        </PlayerMarker>
-        <PlayerMarker marker="red">{player.state.stocks.red}</PlayerMarker>
+        <PlayerMarker marker="blue">{player.stocks.blue}</PlayerMarker>
+        <PlayerMarker marker="purple">{player.stocks.purple}</PlayerMarker>
+        <PlayerMarker marker="yellow">{player.stocks.yellow}</PlayerMarker>
+        <PlayerMarker marker="red">{player.stocks.red}</PlayerMarker>
       </StatsContainer>
 
       {turn != null ? <TurnContainer>{turn}</TurnContainer> : null}

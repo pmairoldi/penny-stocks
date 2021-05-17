@@ -1,7 +1,8 @@
 import { createServer } from "http";
 import { Server } from "socket.io";
+import { ActionDTO } from "./dto";
 import {
-  Action,
+  actionFromJSON,
   createGame,
   createPlayer,
   Game,
@@ -63,21 +64,21 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("action", (action: Action) => {
-    const id = action.gameId;
+  socket.on("action", (actionDTO: ActionDTO) => {
+    const id = actionDTO.gameId;
     const game = games.get(id);
 
     if (game != null) {
+      const action = actionFromJSON(actionDTO, socket.id);
       const updated = game.applyAction(action);
       games.set(id, updated);
 
-      const dto = jsonFromGame(updated);
-      socket.emit("update", dto);
-      socket.broadcast.emit("update", dto);
+      const gameDTO = jsonFromGame(updated);
+      socket.emit("update", gameDTO);
+      socket.broadcast.emit("update", gameDTO);
     }
   });
 
-  // notify users upon disconnection
   socket.on("disconnect", () => {
     Array.from(games.entries()).forEach(([id, game]) => {
       const player = game.state.players.find((p) => p.id === socket.id);

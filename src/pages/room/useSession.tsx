@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
-import { Game } from "../../server/model";
 import { server, Session } from "../../client";
+import { GameDTO } from "../../server/dto";
 
 export interface UseSessionValue {
   session: Session | undefined;
@@ -13,7 +13,7 @@ export function useSession(notFound: () => void): UseSessionValue {
   const [session, setSession] = useState<Session>();
   const [loading, setLoading] = useState<boolean>(false);
 
-  const onUpdate = useCallback((game: Game) => {
+  const onUpdate = useCallback((game: GameDTO) => {
     setSession((session) => {
       if (session != null) {
         return { ...session, game: game };

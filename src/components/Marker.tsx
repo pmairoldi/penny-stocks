@@ -1,8 +1,8 @@
 import styled, { css } from "styled-components";
-import { Marker as MarkerModel } from "../server/model";
+import { MarkerDTO } from "../server/dto";
 
 interface MarkerProps {
-  marker: MarkerModel;
+  marker: MarkerDTO;
 }
 
 export const Marker = styled.div<MarkerProps>`

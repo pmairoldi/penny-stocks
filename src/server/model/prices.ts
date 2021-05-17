@@ -1,3 +1,4 @@
+import { PricesDTO } from "../dto";
 import { Marker } from "./marker";
 
 export interface Price {
@@ -20,12 +21,8 @@ const defaultPrice = 5;
 const maxPrice = 25;
 const minPrice = -5;
 
-export function valueFromRawValue(rawValue: number) {
-  if (rawValue < 0) {
-    return 0;
-  } else {
-    return rawValue;
-  }
+function valueFromRawValue(rawValue: number) {
+  return Math.max(0, rawValue);
 }
 
 const updatePrice = (state: PricesState) => {
@@ -81,8 +78,6 @@ export function pricesFromState(state: PricesState): Prices {
     updatePrice: updatePrice(state),
   };
 }
-
-export type PricesDTO = PricesState;
 
 export function pricesFromJSON(json: PricesDTO): Prices {
   return pricesFromState(json);

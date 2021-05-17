@@ -1,11 +1,5 @@
 import { io } from "socket.io-client";
-import {
-  Action,
-  GameDTO,
-  gameFromJSON,
-  PlayerDTO,
-  playerFromJSON,
-} from "../server/model";
+import { ActionDTO, GameDTO, PlayerDTO } from "../server/dto";
 import { Server } from "./server";
 
 const URL =
@@ -27,7 +21,7 @@ export const server: Server = {
       socket.auth = { username: name };
       socket.connect();
 
-      const update = (action: Action) => {
+      const update = (action: ActionDTO) => {
         socket.emit("action", action);
       };
 
@@ -37,15 +31,15 @@ export const server: Server = {
 
       socket.on("start", (dto: { me: PlayerDTO; game: GameDTO }) => {
         resolve({
-          me: playerFromJSON(dto.me),
-          game: gameFromJSON(dto.game),
+          me: dto.me,
+          game: dto.game,
           update: update,
           cleanup: cleanup,
         });
       });
 
       socket.on("update", (dto: GameDTO) => {
-        onUpdate(gameFromJSON(dto));
+        onUpdate(dto);
       });
 
       socket.emit("create");
@@ -56,7 +50,7 @@ export const server: Server = {
       socket.auth = { username: name };
       socket.connect();
 
-      const update = (action: Action) => {
+      const update = (action: ActionDTO) => {
         socket.emit("action", action);
       };
 
@@ -66,15 +60,15 @@ export const server: Server = {
 
       socket.on("start", (dto: { me: PlayerDTO; game: GameDTO }) => {
         resolve({
-          me: playerFromJSON(dto.me),
-          game: gameFromJSON(dto.game),
+          me: dto.me,
+          game: dto.game,
           update: update,
           cleanup: cleanup,
         });
       });
 
       socket.on("update", (dto: GameDTO) => {
-        onUpdate(gameFromJSON(dto));
+        onUpdate(dto);
       });
 
       socket.on("not found", () => {

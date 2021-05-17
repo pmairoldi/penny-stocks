@@ -1,3 +1,4 @@
+import { TurnDTO } from "../dto";
 import { Marker } from "./marker";
 import { Player } from "./player";
 import { shuffle } from "./utils";
@@ -130,13 +131,6 @@ export function turnFromState(state: TurnState): Turn {
     makeTrade: makeTrade(state),
     canMakeTrade: canMakeTrade(state),
   };
-}
-
-export interface TurnDTO {
-  playerId: string;
-  markers: Marker[];
-  marker: Marker | null;
-  tradesRemaining: number;
 }
 
 export function turnFromJSON(json: TurnDTO): Turn {

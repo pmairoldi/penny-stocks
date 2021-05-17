@@ -1,12 +1,11 @@
+import { BoardDTO } from "../dto";
 import { Marker } from "./marker";
 import { Modifier } from "./modifier";
 import { Tile } from "./tile";
 import { getRandomItem, removeItem } from "./utils";
 
-type Row = Tile[];
-
 interface BoardState {
-  rows: Row[];
+  rows: Tile[][];
 }
 
 export interface Board {
@@ -139,7 +138,7 @@ const createModifers = (): Modifier[] => {
 
 const canPlaceMarker = (state: BoardState) => {
   const validateCurrentRow = (
-    row: Row,
+    row: Tile[],
     columnIndex: number
   ): (Marker | null)[] => {
     const markers = new Array<Marker | null>();
@@ -158,7 +157,7 @@ const canPlaceMarker = (state: BoardState) => {
   };
 
   const validateBeforeOrAfterRow = (
-    row: Row,
+    row: Tile[],
     columnIndex: number,
     currentRowSize: number
   ): (Marker | null)[] => {
@@ -303,10 +302,6 @@ export function boardFromState(state: BoardState): Board {
     hasActionTilesRemaining: hasActionTilesRemaining(state),
     tileAt: tileAt(state),
   };
-}
-
-export interface BoardDTO {
-  rows: Row[];
 }
 
 export function boardFromJSON(json: BoardDTO): Board {

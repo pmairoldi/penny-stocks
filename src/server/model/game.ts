@@ -1,22 +1,11 @@
+import { GameDTO } from "../dto";
 import { Action } from "./actions";
-import {
-  Board,
-  BoardDTO,
-  boardFromJSON,
-  createBoard,
-  jsonFromBoard,
-} from "./board";
+import { Board, boardFromJSON, createBoard, jsonFromBoard } from "./board";
 import { Marker } from "./marker";
 import { Modifier, PlayerModifier } from "./modifier";
-import { jsonFromPlayer, Player, PlayerDTO, playerFromJSON } from "./player";
-import {
-  createPrices,
-  jsonFromPrices,
-  Prices,
-  PricesDTO,
-  pricesFromJSON,
-} from "./prices";
-import { createTurn, jsonFromTurn, Turn, TurnDTO, turnFromJSON } from "./turn";
+import { jsonFromPlayer, Player, playerFromJSON } from "./player";
+import { createPrices, jsonFromPrices, Prices, pricesFromJSON } from "./prices";
+import { createTurn, jsonFromTurn, Turn, turnFromJSON } from "./turn";
 import { shuffle } from "./utils";
 
 interface GameState {
@@ -33,10 +22,6 @@ export interface Game {
   state: GameState;
   id: string;
   applyAction: (action: Action) => Game;
-  // placeMarker: (playerId: string, row: number, column: number) => Game;
-  // endTurn: (playerId: string) => Game;
-  // buyStock: (playerId: string, marker: Marker) => Game;
-  // sellStock: (playerId: string, marker: Marker) => Game;
   addPlayer: (player: Player) => Game;
   removePlayer: (player: Player) => Game;
 }
@@ -409,16 +394,6 @@ export function gameFromState(state: GameState): Game {
     addPlayer: addPlayer(state),
     removePlayer: removePlayer(state),
   };
-}
-
-export interface GameDTO {
-  id: string;
-  board: BoardDTO;
-  prices: PricesDTO;
-  players: PlayerDTO[];
-  markers: Marker[];
-  turn: TurnDTO;
-  gameover: boolean;
 }
 
 export function gameFromJSON(json: GameDTO): Game {

@@ -1,17 +1,13 @@
 import { FC, useCallback, useMemo } from "react";
 import styled, { css } from "styled-components";
-import {
-  Marker,
-  Price as PriceModel,
-  valueFromRawValue,
-} from "../server/model";
+import { MarkerDTO, PriceDTO } from "../server/dto";
 import { Button } from "./Button";
 
 interface PriceProps {
-  marker: Marker;
-  price: PriceModel;
-  onBuy: (marker: Marker) => void;
-  onSell: (marker: Marker) => void;
+  marker: MarkerDTO;
+  price: PriceDTO;
+  onBuy: (marker: MarkerDTO) => void;
+  onSell: (marker: MarkerDTO) => void;
   canBuy: boolean;
   canSell: boolean;
 }
@@ -55,7 +51,7 @@ const PriceBar = styled.div`
   padding: 8px;
 `;
 
-const PriceBarItem = styled.div<{ marker: Marker; selected: boolean }>`
+const PriceBarItem = styled.div<{ marker: MarkerDTO; selected: boolean }>`
   width: 30px;
   height: 30px;
   display: flex;
@@ -115,7 +111,7 @@ export const Price: FC<PriceProps> = (props) => {
   const prices = useMemo(() => {
     const values = new Array<{ rawValue: number; value: number }>();
     for (let i = min; i <= max; ++i) {
-      values.push({ rawValue: i, value: valueFromRawValue(i) });
+      values.push({ rawValue: i, value: Math.max(0, i) });
     }
     return values;
   }, [min, max]);

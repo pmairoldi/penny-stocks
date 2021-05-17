@@ -1,11 +1,12 @@
 import { FC, useCallback, useMemo } from "react";
 import styled from "styled-components";
 import {
-  Action,
-  Game as GameModel,
-  Marker as MarkerModel,
-  Player as PlayerModel,
-} from "../server/model";
+  ActionDTO,
+  GameDTO,
+  MarkerDTO,
+  PlayerDTO,
+  PricesDTO,
+} from "../server/dto";
 import { Board } from "./Board";
 import { Player } from "./Player";
 import { PlayersDropdown } from "./PlayersDropdown";
@@ -13,9 +14,9 @@ import { Price } from "./Price";
 import { Turn } from "./Turn";
 
 interface GameProps {
-  me: PlayerModel;
-  game: GameModel;
-  updateGame: (action: Action) => void;
+  me: PlayerDTO;
+  game: GameDTO;
+  updateGame: (action: ActionDTO) => void;
 }
 
 const GameContainer = styled.div`
@@ -118,19 +119,19 @@ export const Game: FC<GameProps> = (props) => {
   const { me: sessionPlayer, game, updateGame } = props;
 
   const me = useMemo(() => {
-    return game.state.players.find((p) => p.id === sessionPlayer.id);
+    return game.players.find((p) => p.id === sessionPlayer.id);
   }, [sessionPlayer, game]);
 
   const prices = useMemo(() => {
-    return game.state.prices.state;
+    return game.prices;
   }, [game]);
 
   const players = useMemo(() => {
-    return game.state.players;
+    return game.players;
   }, [game]);
 
   const turn = useMemo(() => {
-    return game.state.turn;
+    return game.turn;
   }, [game]);
 
   const bluePrice = useMemo(() => {
@@ -171,7 +172,7 @@ export const Game: FC<GameProps> = (props) => {
   }, [game, me, updateGame]);
 
   const onBuy = useCallback(
-    (marker: MarkerModel) => {
+    (marker: MarkerDTO) => {
       if (me != null) {
         updateGame({
           type: "buy",
@@ -185,7 +186,7 @@ export const Game: FC<GameProps> = (props) => {
   );
 
   const onSell = useCallback(
-    (marker: MarkerModel) => {
+    (marker: MarkerDTO) => {
       if (me != null) {
         updateGame({
           type: "sell",
@@ -200,11 +201,11 @@ export const Game: FC<GameProps> = (props) => {
 
   const canBuy = useMemo<
     {
-      [price in MarkerModel]: boolean;
+      [price in MarkerDTO]: boolean;
     }
   >(() => {
-    if (turn.state.playerId === me?.id && turn.state.tradesRemaining > 0) {
-      const money = me.state.money;
+    if (turn.playerId === me?.id && turn.tradesRemaining > 0) {
+      const money = me.money;
       return {
         blue: money >= prices.blue.value,
         purple: money >= prices.purple.value,
@@ -234,11 +235,11 @@ export const Game: FC<GameProps> = (props) => {
 
   const canSell = useMemo<
     {
-      [price in MarkerModel]: boolean;
+      [price in MarkerDTO]: boolean;
     }
   >(() => {
-    if (turn.state.playerId === me?.id && turn.state.tradesRemaining > 0) {
-      const stocks = me.state.stocks;
+    if (turn.playerId === me?.id && turn.tradesRemaining > 0) {
+      const stocks = me.stocks;
       return {
         blue: stocks.blue > 0,
         purple: stocks.purple > 0,
@@ -267,14 +268,14 @@ export const Game: FC<GameProps> = (props) => {
   }, [canSell]);
 
   const isGameOver = useMemo(() => {
-    return game.state.gameover;
+    return game.gameover;
   }, [game]);
 
   const playerScores = useMemo(() => {
-    return game.state.players
+    const { prices } = game;
+    return game.players
       .map((p) => {
-        const { prices } = game.state;
-        return { id: p.id, name: p.name, score: p.score(prices) };
+        return { id: p.id, name: p.name, score: score(p, prices) };
       })
       .sort((a, b) => {
         if (a.score > b.score) {
@@ -347,22 +348,22 @@ export const Game: FC<GameProps> = (props) => {
               <Player
                 player={me}
                 showMoney={true}
-                active={me.id === turn.state.playerId}
+                active={me.id === turn.playerId}
                 turn={
-                  me?.id === turn.state.playerId ? (
+                  me?.id === turn.playerId ? (
                     <Turn turn={turn} endTurn={endTurn} />
                   ) : undefined
                 }
               ></Player>
             )}
           </DataContainer>
-          <MarkerCount>{game.state.markers.length}</MarkerCount>
+          <MarkerCount>{game.markers.length}</MarkerCount>
         </PlayContainer>
       )}
       <PlayersContainer>
         <PlayersDropdown>
           {players.map((player) => {
-            const isActive = player.id === turn.state.playerId;
+            const isActive = player.id === turn.playerId;
             return (
               <Player
                 key={player.id}
@@ -377,3 +378,15 @@ export const Game: FC<GameProps> = (props) => {
     </GameContainer>
   );
 };
+
+function score(player: PlayerDTO, prices: PricesDTO): number {
+  const { money, stocks } = player;
+
+  const remaining =
+    prices.blue.value * stocks.blue +
+    prices.red.value * stocks.red +
+    prices.yellow.value * stocks.yellow +
+    prices.purple.value * stocks.purple;
+
+  return money + remaining;
+}

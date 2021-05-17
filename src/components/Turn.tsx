@@ -1,11 +1,11 @@
 import { FC, useMemo } from "react";
 import styled from "styled-components";
-import { Turn as TurnModel } from "../server/model";
+import { TurnDTO } from "../server/dto";
 import { Button } from "./Button";
 import { Marker } from "./Marker";
 
 interface TurnProps {
-  turn: TurnModel;
+  turn: TurnDTO;
   endTurn: () => void;
 }
 
@@ -48,15 +48,15 @@ export const Turn: FC<TurnProps> = (props) => {
   const { turn, endTurn } = props;
 
   const endTurnDisabled = useMemo(() => {
-    return !turn.canEnd();
+    return !canEnd(turn);
   }, [turn]);
 
   return (
     <TurnContainer>
       <DataContainer>
-        <DataItem>Trades Remaining: {turn.state.tradesRemaining}</DataItem>
+        <DataItem>Trades Remaining: {turn.tradesRemaining}</DataItem>
         <DataItem>
-          {turn.state.markers.map((m, index) => {
+          {turn.markers.map((m, index) => {
             return <Marker key={`${m}-${index}`} marker={m} />;
           })}
         </DataItem>
@@ -66,4 +66,8 @@ export const Turn: FC<TurnProps> = (props) => {
       </Button>
     </TurnContainer>
   );
+};
+
+const canEnd = (turn: TurnDTO) => {
+  return turn.markers.length === 0;
 };

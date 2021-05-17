@@ -1,12 +1,12 @@
 import { FC, useCallback, useMemo } from "react";
 import styled, { css } from "styled-components";
-import { Marker as MarkerModel, Modifier } from "../server/model";
+import { MarkerDTO, ModifierDTO } from "../server/dto";
 import { Marker } from "./Marker";
 
 interface DefaultTileProps {
   row: number;
   column: number;
-  marker: MarkerModel | null;
+  marker: MarkerDTO | null;
   onClick: (row: number, column: number) => void;
 }
 
@@ -53,9 +53,9 @@ export const DefaultTile: FC<DefaultTileProps> = (props) => {
 interface ModifierTileProps {
   row: number;
   column: number;
-  modifier: Modifier;
-  marker: MarkerModel | null;
-  onClick: (row: number, column: number, modifer: Modifier) => void;
+  modifier: ModifierDTO;
+  marker: MarkerDTO | null;
+  onClick: (row: number, column: number) => void;
 }
 
 const StyledModifierTile = styled(StyledTile)<{ isSpecial: boolean }>`
@@ -90,8 +90,8 @@ export const ModifierTile: FC<ModifierTileProps> = (props) => {
   }, [marker]);
 
   const onClick = useCallback(() => {
-    clickHandler(row, column, modifier);
-  }, [row, column, modifier, clickHandler]);
+    clickHandler(row, column);
+  }, [row, column, clickHandler]);
 
   const isSpecial = useMemo(() => {
     switch (modifier) {
@@ -142,10 +142,10 @@ export const ModifierTile: FC<ModifierTileProps> = (props) => {
 interface StartTileProps {
   row: number;
   column: number;
-  marker: MarkerModel;
+  marker: MarkerDTO;
 }
 
-const StyledStartTile = styled(StyledTile)<{ color: MarkerModel }>`
+const StyledStartTile = styled(StyledTile)<{ color: MarkerDTO }>`
   background-color: ${(props) => {
     switch (props.color) {
       case "blue":
