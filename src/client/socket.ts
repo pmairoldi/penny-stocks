@@ -25,15 +25,25 @@ export const server: Server = {
         socket.emit("action", action);
       };
 
+      const start = (id: string) => {
+        socket.emit("start", { id: id });
+      };
+
+      const playAgain = (id: string) => {
+        socket.emit("restart", { id: id });
+      };
+
       const cleanup = () => {
         socket.disconnect();
       };
 
-      socket.on("start", (dto: { me: PlayerDTO; game: GameDTO }) => {
+      socket.on("created", (dto: { me: PlayerDTO; game: GameDTO }) => {
         resolve({
           me: dto.me,
           game: dto.game,
           update: update,
+          start: start,
+          playAgain: playAgain,
           cleanup: cleanup,
         });
       });
@@ -58,7 +68,7 @@ export const server: Server = {
         socket.disconnect();
       };
 
-      socket.on("start", (dto: { me: PlayerDTO; game: GameDTO }) => {
+      socket.on("joined", (dto: { me: PlayerDTO; game: GameDTO }) => {
         resolve({
           me: dto.me,
           game: dto.game,

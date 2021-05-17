@@ -10,6 +10,6 @@ export interface GameDTO {
   prices: PricesDTO;
   players: PlayerDTO[];
   markers: MarkerDTO[];
-  turn: TurnDTO;
-  gameover: boolean;
+  turn: TurnDTO | null;
+  state: "created" | "in-progress" | "gameover";
 }

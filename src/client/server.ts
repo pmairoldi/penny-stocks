@@ -4,6 +4,8 @@ export interface Session {
   me: PlayerDTO;
   game: GameDTO;
   update: (action: ActionDTO) => void;
+  start?: (id: string) => void;
+  playAgain?: (id: string) => void;
   cleanup: () => void;
 }
 

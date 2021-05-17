@@ -1,12 +1,6 @@
 import { FC, useCallback, useMemo } from "react";
 import styled from "styled-components";
-import {
-  ActionDTO,
-  GameDTO,
-  MarkerDTO,
-  PlayerDTO,
-  PricesDTO,
-} from "../server/dto";
+import { ActionDTO, GameDTO, MarkerDTO, PlayerDTO } from "../server/dto";
 import { Board } from "./Board";
 import { Player } from "./Player";
 import { PlayersDropdown } from "./PlayersDropdown";
@@ -80,41 +74,6 @@ const MarkerCount = styled.div`
   border: 1px solid white;
 `;
 
-const GameOver = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-  justify-content: center;
-  align-items: center;
-`;
-
-const GameOverTitle = styled.div`
-  font-size: 6rem;
-  font-weight: bold;
-  color: #c1666b;
-  text-align: center;
-`;
-
-const GameOverPlayers = styled.div`
-  display: table;
-`;
-
-const GameOverPlayer = styled.div`
-  display: table-row;
-`;
-
-const GameOverPlayerName = styled.div`
-  display: table-cell;
-  font-weight: bold;
-  padding: 4px;
-`;
-
-const GameOverPlayerScore = styled.div`
-  display: table-cell;
-  padding: 4px;
-`;
-
 export const Game: FC<GameProps> = (props) => {
   const { me: sessionPlayer, game, updateGame } = props;
 
@@ -156,7 +115,6 @@ export const Game: FC<GameProps> = (props) => {
         updateGame({
           type: "place-marker",
           gameId: game.id,
-          playerId: me.id,
           row: row,
           column: column,
         });
@@ -167,7 +125,7 @@ export const Game: FC<GameProps> = (props) => {
 
   const endTurn = useCallback(() => {
     if (me != null) {
-      updateGame({ type: "end-turn", gameId: game.id, playerId: me.id });
+      updateGame({ type: "end-turn", gameId: game.id });
     }
   }, [game, me, updateGame]);
 
@@ -177,7 +135,6 @@ export const Game: FC<GameProps> = (props) => {
         updateGame({
           type: "buy",
           gameId: game.id,
-          playerId: me.id,
           marker: marker,
         });
       }
@@ -191,7 +148,6 @@ export const Game: FC<GameProps> = (props) => {
         updateGame({
           type: "sell",
           gameId: game.id,
-          playerId: me.id,
           marker: marker,
         });
       }
@@ -204,7 +160,7 @@ export const Game: FC<GameProps> = (props) => {
       [price in MarkerDTO]: boolean;
     }
   >(() => {
-    if (turn.playerId === me?.id && turn.tradesRemaining > 0) {
+    if (turn != null && turn.playerId === me?.id && turn.tradesRemaining > 0) {
       const money = me.money;
       return {
         blue: money >= prices.blue.value,
@@ -238,7 +194,7 @@ export const Game: FC<GameProps> = (props) => {
       [price in MarkerDTO]: boolean;
     }
   >(() => {
-    if (turn.playerId === me?.id && turn.tradesRemaining > 0) {
+    if (turn != null && turn.playerId === me?.id && turn.tradesRemaining > 0) {
       const stocks = me.stocks;
       return {
         blue: stocks.blue > 0,
@@ -267,103 +223,66 @@ export const Game: FC<GameProps> = (props) => {
     return canSell.yellow;
   }, [canSell]);
 
-  const isGameOver = useMemo(() => {
-    return game.gameover;
-  }, [game]);
-
-  const playerScores = useMemo(() => {
-    const { prices } = game;
-    return game.players
-      .map((p) => {
-        return { id: p.id, name: p.name, score: score(p, prices) };
-      })
-      .sort((a, b) => {
-        if (a.score > b.score) {
-          return -1;
-        } else if (a.score < b.score) {
-          return 1;
-        } else {
-          return 0;
-        }
-      });
-  }, [game]);
-
   return (
     <GameContainer>
-      {isGameOver ? (
-        <GameOver>
-          <GameOverTitle>Game Over</GameOverTitle>
-          <GameOverPlayers>
-            {playerScores.map((p) => {
-              return (
-                <GameOverPlayer key={p.id}>
-                  <GameOverPlayerName>{p.name}</GameOverPlayerName>
-                  <GameOverPlayerScore>${p.score}</GameOverPlayerScore>
-                </GameOverPlayer>
-              );
-            })}
-          </GameOverPlayers>
-        </GameOver>
-      ) : (
-        <PlayContainer>
-          <StyledBoard game={game} placeMarker={placeMarker} />
+      <PlayContainer>
+        <StyledBoard game={game} placeMarker={placeMarker} />
 
-          <DataContainer>
-            <PricesContainer>
-              <Price
-                marker="blue"
-                price={bluePrice}
-                onBuy={onBuy}
-                onSell={onSell}
-                canBuy={canBuyBlue}
-                canSell={canSellBlue}
-              />
-              <Price
-                marker="purple"
-                price={purplePrice}
-                onBuy={onBuy}
-                onSell={onSell}
-                canBuy={canBuyPurple}
-                canSell={canSellPurple}
-              />
-              <Price
-                marker="yellow"
-                price={yellowPrice}
-                onBuy={onBuy}
-                onSell={onSell}
-                canBuy={canBuyYellow}
-                canSell={canSellYellow}
-              />
-              <Price
-                marker="red"
-                price={redPrice}
-                onBuy={onBuy}
-                onSell={onSell}
-                canBuy={canBuyRed}
-                canSell={canSellRed}
-              />
-            </PricesContainer>
+        <DataContainer>
+          <PricesContainer>
+            <Price
+              marker="blue"
+              price={bluePrice}
+              onBuy={onBuy}
+              onSell={onSell}
+              canBuy={canBuyBlue}
+              canSell={canSellBlue}
+            />
+            <Price
+              marker="purple"
+              price={purplePrice}
+              onBuy={onBuy}
+              onSell={onSell}
+              canBuy={canBuyPurple}
+              canSell={canSellPurple}
+            />
+            <Price
+              marker="yellow"
+              price={yellowPrice}
+              onBuy={onBuy}
+              onSell={onSell}
+              canBuy={canBuyYellow}
+              canSell={canSellYellow}
+            />
+            <Price
+              marker="red"
+              price={redPrice}
+              onBuy={onBuy}
+              onSell={onSell}
+              canBuy={canBuyRed}
+              canSell={canSellRed}
+            />
+          </PricesContainer>
 
-            {me == null ? null : (
-              <Player
-                player={me}
-                showMoney={true}
-                active={me.id === turn.playerId}
-                turn={
-                  me?.id === turn.playerId ? (
-                    <Turn turn={turn} endTurn={endTurn} />
-                  ) : undefined
-                }
-              ></Player>
-            )}
-          </DataContainer>
-          <MarkerCount>{game.markers.length}</MarkerCount>
-        </PlayContainer>
-      )}
+          {me == null ? null : (
+            <Player
+              player={me}
+              showMoney={true}
+              active={me.id === turn?.playerId}
+              turn={
+                me?.id === turn?.playerId ? (
+                  <Turn turn={turn} endTurn={endTurn} />
+                ) : undefined
+              }
+            ></Player>
+          )}
+        </DataContainer>
+        <MarkerCount>{game.markers.length}</MarkerCount>
+      </PlayContainer>
       <PlayersContainer>
         <PlayersDropdown>
           {players.map((player) => {
-            const isActive = player.id === turn.playerId;
+            const isActive = player.id === turn?.playerId;
             return (
               <Player
                 key={player.id}
@@ -378,15 +297,3 @@ export const Game: FC<GameProps> = (props) => {
     </GameContainer>
   );
 };
-
-function score(player: PlayerDTO, prices: PricesDTO): number {
-  const { money, stocks } = player;
-
-  const remaining =
-    prices.blue.value * stocks.blue +
-    prices.red.value * stocks.red +
-    prices.yellow.value * stocks.yellow +
-    prices.purple.value * stocks.purple;
-
-  return money + remaining;
-}

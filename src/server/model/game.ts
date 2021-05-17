@@ -14,8 +14,8 @@ interface GameState {
   prices: Prices;
   players: Player[];
   markers: Marker[];
-  turn: Turn;
-  gameover: boolean;
+  turn: Turn | null;
+  state: "created" | "in-progress" | "gameover";
 }
 
 export interface Game {
@@ -24,6 +24,8 @@ export interface Game {
   applyAction: (action: Action) => Game;
   addPlayer: (player: Player) => Game;
   removePlayer: (player: Player) => Game;
+  start: () => Game;
+  restart: () => Game;
 }
 
 function pricesModifier(modifier?: Modifier): number | false {
@@ -126,6 +128,10 @@ function getModifierFor(
 const placeMarker = (state: GameState) => {
   return (playerId: string, row: number, column: number): Game => {
     const { turn, board, prices, players } = state;
+    if (turn == null) {
+      return gameFromState(state);
+    }
+
     const { state: turnState } = turn;
 
     if (turnState.playerId !== playerId) {
@@ -172,27 +178,36 @@ const placeMarker = (state: GameState) => {
 
     const updateMarkers = turnState.markers.slice(1);
 
-    const gameover = !updatedBoard.hasActionTilesRemaining();
-    if (gameover) {
+    if (!updatedBoard.hasActionTilesRemaining()) {
+      const updated: GameState = {
+        ...state,
+        board: updatedBoard,
+        prices: updatedPrices,
+        players: updatedPlayers,
+        turn: turn.updateMarker(updateMarkers),
+        state: "gameover",
+      };
+
+      return gameFromState(updated);
+    } else {
+      const updated: GameState = {
+        ...state,
+        board: updatedBoard,
+        prices: updatedPrices,
+        players: updatedPlayers,
+        turn: turn.updateMarker(updateMarkers),
+      };
+
+      return gameFromState(updated);
     }
-
-    const updated: GameState = {
-      ...state,
-      board: updatedBoard,
-      prices: updatedPrices,
-      players: updatedPlayers,
-      turn: turn.updateMarker(updateMarkers),
-      gameover: gameover,
-    };
-
-    return gameFromState(updated);
   };
 };
 
 const endTurn = (state: GameState) => {
   return (playerId: string): Game => {
     const { turn, players, markers } = state;
-    if (turn.state.playerId !== playerId) {
+
+    if (turn == null || turn.state.playerId !== playerId) {
       return gameFromState(state);
     }
 
@@ -223,7 +238,8 @@ const endTurn = (state: GameState) => {
 const buyStock = (state: GameState) => {
   return (playerId: string, marker: Marker): Game => {
     const { turn, players } = state;
-    if (turn.state.playerId !== playerId) {
+
+    if (turn == null || turn.state.playerId !== playerId) {
       return gameFromState(state);
     }
 
@@ -253,7 +269,7 @@ const buyStock = (state: GameState) => {
     const updated = {
       ...state,
       players: updatedPlayers,
-      turn: state.turn.makeTrade(),
+      turn: turn.makeTrade(),
     };
 
     return gameFromState(updated);
@@ -263,7 +279,8 @@ const buyStock = (state: GameState) => {
 const sellStock = (state: GameState) => {
   return (playerId: string, marker: Marker): Game => {
     const { turn, players } = state;
-    if (turn.state.playerId !== playerId) {
+
+    if (turn == null || turn.state.playerId !== playerId) {
       return gameFromState(state);
     }
 
@@ -294,7 +311,7 @@ const sellStock = (state: GameState) => {
     const updated = {
       ...state,
       players: updatedPlayers,
-      turn: state.turn.makeTrade(),
+      turn: turn.makeTrade(),
     };
 
     return gameFromState(updated);
@@ -342,7 +359,7 @@ const removePlayer = (state: GameState) => {
 
     const index = players.findIndex((p) => p.id === player.id);
 
-    if (turn.state.playerId === player.id) {
+    if (turn != null && turn.state.playerId === player.id) {
       const updatedMarkers =
         turn.state.playerId === player.id
           ? markers.concat(turn.state.markers)
@@ -371,16 +388,52 @@ const removePlayer = (state: GameState) => {
   };
 };
 
-export function createGame(id: string, players: Player[]): Game {
-  const { turn, markers } = createTurn(players[0], createMarkers())!;
+const start = (state: GameState) => {
+  return (): Game => {
+    const { players } = state;
+    if (players.length === 0) {
+      return gameFromState(state);
+    }
+
+    const randomizedPlayers = shuffle(players);
+    const startingPlayer = randomizedPlayers[0];
+    const { turn, markers } = createTurn(startingPlayer, createMarkers())!;
+
+    const updatedState: GameState = {
+      ...state,
+      players: players,
+      turn: turn,
+      markers: markers,
+      state: "in-progress",
+    };
+
+    return gameFromState(updatedState);
+  };
+};
+
+const restart = (state: GameState) => {
+  return (): Game => {
+    const { id, players } = state;
+
+    let updated = createGame(id);
+
+    players.forEach((p) => {
+      updated = updated.addPlayer(p);
+    });
+
+    return updated.start();
+  };
+};
+
+export function createGame(id: string): Game {
   const state: GameState = {
     id: id,
     board: createBoard(),
     prices: createPrices(),
-    players: players,
-    markers: markers,
-    turn: turn,
-    gameover: false,
+    players: [],
+    markers: createMarkers(),
+    turn: null,
+    state: "created",
   };
 
   return gameFromState(state);
@@ -393,6 +446,8 @@ export function gameFromState(state: GameState): Game {
     applyAction: applyAction(state),
     addPlayer: addPlayer(state),
     removePlayer: removePlayer(state),
+    start: start(state),
+    restart: restart(state),
   };
 }
 
@@ -403,8 +458,8 @@ export function gameFromJSON(json: GameDTO): Game {
     prices: pricesFromJSON(json.prices),
     players: json.players.map((p) => playerFromJSON(p)),
     markers: json.markers,
-    turn: turnFromJSON(json.turn),
-    gameover: json.gameover,
+    turn: json.turn == null ? null : turnFromJSON(json.turn),
+    state: json.state,
   };
 
   return gameFromState(state);
@@ -417,7 +472,7 @@ export function jsonFromGame(game: Game): GameDTO {
     prices: jsonFromPrices(game.state.prices),
     players: game.state.players.map((p) => jsonFromPlayer(p)),
     markers: game.state.markers,
-    turn: jsonFromTurn(game.state.turn),
-    gameover: game.state.gameover,
+    turn: game.state.turn == null ? null : jsonFromTurn(game.state.turn),
+    state: game.state.state,
   };
 }

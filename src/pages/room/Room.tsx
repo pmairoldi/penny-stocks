@@ -1,6 +1,7 @@
 import { FC, useCallback, useEffect, useMemo } from "react";
 import { useHistory, useParams } from "react-router-dom";
-import { Game } from "../../components";
+import { Game, Lobby } from "../../components";
+import { GameOver } from "../../components/GameOver";
 import { CreateUser } from "./CreateUser";
 import { useSession } from "./useSession";
 
@@ -33,6 +34,14 @@ export const Room: FC = () => {
     <>
       {session == null ? (
         <CreateUser id={id} server={server} />
+      ) : session.game.state === "created" ? (
+        <Lobby game={session.game} onStart={session.start} />
+      ) : session.game.state === "gameover" ? (
+        <GameOver
+          me={session.me}
+          game={session.game}
+          onPlayAgain={session.playAgain}
+        />
       ) : (
         <Game me={session.me} game={session.game} updateGame={session.update} />
       )}

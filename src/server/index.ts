@@ -34,11 +34,11 @@ io.on("connection", (socket) => {
     const id = `${Math.floor(Math.random() * 101)}`;
 
     const me = createPlayer(socket.id, socket.data.username);
-    const game = createGame(id, [me]);
+    const game = createGame(id).addPlayer(me);
 
     games.set(id, game);
 
-    socket.emit("start", {
+    socket.emit("created", {
       me: jsonFromPlayer(me),
       game: jsonFromGame(game),
     });
@@ -55,12 +55,46 @@ io.on("connection", (socket) => {
 
       games.set(id, updated);
 
-      socket.emit("start", {
+      socket.emit("joined", {
         me: jsonFromPlayer(me),
         game: jsonFromGame(updated),
       });
 
       socket.broadcast.emit("update", jsonFromGame(updated));
+    }
+  });
+
+  socket.on("start", ({ id }: { id: string }) => {
+    const game = games.get(id);
+
+    if (game == null) {
+      socket.emit("not found");
+    } else {
+      const updated = game.start();
+
+      games.set(id, updated);
+
+      const gameDTO = jsonFromGame(updated);
+
+      socket.broadcast.emit("update", gameDTO);
+      socket.emit("update", gameDTO);
+    }
+  });
+
+  socket.on("restart", ({ id }: { id: string }) => {
+    const game = games.get(id);
+
+    if (game == null) {
+      socket.emit("not found");
+    } else {
+      const updated = game.restart();
+
+      games.set(id, updated);
+
+      const gameDTO = jsonFromGame(updated);
+
+      socket.broadcast.emit("update", gameDTO);
+      socket.emit("update", gameDTO);
     }
   });
 
