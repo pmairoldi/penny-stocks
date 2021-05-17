@@ -5,6 +5,7 @@ import { Marker } from "./Marker";
 
 interface PlayerProps {
   player: PlayerModel;
+  showMoney: boolean;
   turn?: ReactElement;
   active?: boolean;
 }
@@ -55,14 +56,14 @@ const PlayerMarker = styled(Marker)`
 `;
 
 export const Player: FC<PlayerProps> = (props) => {
-  const { player, turn, active } = props;
+  const { player, turn, active, showMoney } = props;
 
   return (
     <StyledPlayer>
       <PlayerName>
         {active === true ? <>&#10148;</> : null}
         <span>{player.state.name}</span>
-        <span>${player.state.money}</span>
+        {showMoney ? <span>${player.state.money}</span> : null}
       </PlayerName>
       <StatsContainer>
         <PlayerMarker marker="blue">{player.state.stocks.blue}</PlayerMarker>

@@ -1,9 +1,8 @@
 import { io } from "socket.io-client";
 import {
-  Game,
+  Action,
   GameDTO,
   gameFromJSON,
-  jsonFromGame,
   PlayerDTO,
   playerFromJSON,
 } from "../server/model";
@@ -28,8 +27,8 @@ export const server: Server = {
       socket.auth = { username: name };
       socket.connect();
 
-      const update = (game: Game) => {
-        socket.emit("update", jsonFromGame(game));
+      const update = (action: Action) => {
+        socket.emit("action", action);
       };
 
       const cleanup = () => {
@@ -57,8 +56,8 @@ export const server: Server = {
       socket.auth = { username: name };
       socket.connect();
 
-      const update = (game: Game) => {
-        socket.emit("update", jsonFromGame(game));
+      const update = (action: Action) => {
+        socket.emit("action", action);
       };
 
       const cleanup = () => {

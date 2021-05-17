@@ -1,3 +1,4 @@
+import { Action } from "./actions";
 import {
   Board,
   BoardDTO,
@@ -31,15 +32,11 @@ interface GameState {
 export interface Game {
   state: GameState;
   id: string;
-  placeMarker: (
-    playerId: string,
-    row: number,
-    column: number,
-    modifier?: Modifier
-  ) => Game;
-  endTurn: (playerId: string) => Game;
-  buyStock: (playerId: string, marker: Marker) => Game;
-  sellStock: (playerId: string, marker: Marker) => Game;
+  applyAction: (action: Action) => Game;
+  // placeMarker: (playerId: string, row: number, column: number) => Game;
+  // endTurn: (playerId: string) => Game;
+  // buyStock: (playerId: string, marker: Marker) => Game;
+  // sellStock: (playerId: string, marker: Marker) => Game;
   addPlayer: (player: Player) => Game;
   removePlayer: (player: Player) => Game;
 }
@@ -127,13 +124,22 @@ function createMarkers(): Marker[] {
   ]);
 }
 
+function getModifierFor(
+  board: Board,
+  row: number,
+  column: number
+): Modifier | undefined {
+  const tile = board.tileAt(row, column);
+  switch (tile.type) {
+    case "modifier":
+      return tile.modifier;
+    default:
+      return undefined;
+  }
+}
+
 const placeMarker = (state: GameState) => {
-  return (
-    playerId: string,
-    row: number,
-    column: number,
-    modifier?: Modifier
-  ): Game => {
+  return (playerId: string, row: number, column: number): Game => {
     const { turn, board, prices, players } = state;
     const { state: turnState } = turn;
 
@@ -150,6 +156,7 @@ const placeMarker = (state: GameState) => {
       return gameFromState(state);
     }
 
+    const modifier = getModifierFor(board, row, column);
     const updatedBoard = board.setMarker(row, column, marker);
 
     const pricesUpdate = pricesModifier(modifier);
@@ -309,6 +316,24 @@ const sellStock = (state: GameState) => {
   };
 };
 
+const applyAction = (state: GameState) => {
+  return (action: Action) => {
+    switch (action.type) {
+      case "place-marker":
+        return placeMarker(state)(action.playerId, action.row, action.column);
+
+      case "end-turn":
+        return endTurn(state)(action.playerId);
+
+      case "buy":
+        return buyStock(state)(action.playerId, action.marker);
+
+      case "sell":
+        return sellStock(state)(action.playerId, action.marker);
+    }
+  };
+};
+
 const addPlayer = (state: GameState) => {
   return (player: Player): Game => {
     const { players } = state;
@@ -380,10 +405,7 @@ export function gameFromState(state: GameState): Game {
   return {
     state: state,
     id: state.id,
-    placeMarker: placeMarker(state),
-    endTurn: endTurn(state),
-    buyStock: buyStock(state),
-    sellStock: sellStock(state),
+    applyAction: applyAction(state),
     addPlayer: addPlayer(state),
     removePlayer: removePlayer(state),
   };

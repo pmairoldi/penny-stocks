@@ -1,11 +1,10 @@
 import { createServer } from "http";
 import { Server } from "socket.io";
 import {
+  Action,
   createGame,
   createPlayer,
   Game,
-  GameDTO,
-  gameFromJSON,
   jsonFromGame,
   jsonFromPlayer,
 } from "./model";
@@ -64,16 +63,18 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("update", (dto: GameDTO) => {
-    const id = dto.id;
-    const game = games.get(dto.id);
+  socket.on("action", (action: Action) => {
+    const id = action.gameId;
+    const game = games.get(id);
 
     if (game != null) {
-      games.set(id, gameFromJSON(dto));
-    }
+      const updated = game.applyAction(action);
+      games.set(id, updated);
 
-    socket.emit("update", dto);
-    socket.broadcast.emit("update", dto);
+      const dto = jsonFromGame(updated);
+      socket.emit("update", dto);
+      socket.broadcast.emit("update", dto);
+    }
   });
 
   // notify users upon disconnection

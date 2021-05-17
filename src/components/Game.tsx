@@ -1,9 +1,9 @@
 import { FC, useCallback, useMemo } from "react";
 import styled from "styled-components";
 import {
+  Action,
   Game as GameModel,
   Marker as MarkerModel,
-  Modifier,
   Player as PlayerModel,
 } from "../server/model";
 import { Board } from "./Board";
@@ -15,7 +15,7 @@ import { Turn } from "./Turn";
 interface GameProps {
   me: PlayerModel;
   game: GameModel;
-  updateGame: (game: GameModel) => void;
+  updateGame: (action: Action) => void;
 }
 
 const GameContainer = styled.div`
@@ -96,11 +96,23 @@ const GameOverTitle = styled.div`
 `;
 
 const GameOverPlayers = styled.div`
-  display: flex;
-  flex-direction: column;
+  display: table;
 `;
 
-const GameOverPlayer = styled.div``;
+const GameOverPlayer = styled.div`
+  display: table-row;
+`;
+
+const GameOverPlayerName = styled.div`
+  display: table-cell;
+  font-weight: bold;
+  padding: 4px;
+`;
+
+const GameOverPlayerScore = styled.div`
+  display: table-cell;
+  padding: 4px;
+`;
 
 export const Game: FC<GameProps> = (props) => {
   const { me: sessionPlayer, game, updateGame } = props;
@@ -138,9 +150,15 @@ export const Game: FC<GameProps> = (props) => {
   }, [prices]);
 
   const placeMarker = useCallback(
-    (row: number, column: number, modifier?: Modifier) => {
+    (row: number, column: number) => {
       if (me != null) {
-        updateGame(game.placeMarker(me.id, row, column, modifier));
+        updateGame({
+          type: "place-marker",
+          gameId: game.id,
+          playerId: me.id,
+          row: row,
+          column: column,
+        });
       }
     },
     [game, me, updateGame]
@@ -148,14 +166,19 @@ export const Game: FC<GameProps> = (props) => {
 
   const endTurn = useCallback(() => {
     if (me != null) {
-      updateGame(game.endTurn(me.id));
+      updateGame({ type: "end-turn", gameId: game.id, playerId: me.id });
     }
   }, [game, me, updateGame]);
 
   const onBuy = useCallback(
     (marker: MarkerModel) => {
       if (me != null) {
-        updateGame(game.buyStock(me.id, marker));
+        updateGame({
+          type: "buy",
+          gameId: game.id,
+          playerId: me.id,
+          marker: marker,
+        });
       }
     },
     [game, me, updateGame]
@@ -164,7 +187,12 @@ export const Game: FC<GameProps> = (props) => {
   const onSell = useCallback(
     (marker: MarkerModel) => {
       if (me != null) {
-        updateGame(game.sellStock(me.id, marker));
+        updateGame({
+          type: "sell",
+          gameId: game.id,
+          playerId: me.id,
+          marker: marker,
+        });
       }
     },
     [game, me, updateGame]
@@ -243,10 +271,20 @@ export const Game: FC<GameProps> = (props) => {
   }, [game]);
 
   const playerScores = useMemo(() => {
-    return game.state.players.map((p) => {
-      const { prices } = game.state;
-      return { id: p.id, name: p.name, score: p.score(prices) };
-    });
+    return game.state.players
+      .map((p) => {
+        const { prices } = game.state;
+        return { id: p.id, name: p.name, score: p.score(prices) };
+      })
+      .sort((a, b) => {
+        if (a.score > b.score) {
+          return -1;
+        } else if (a.score < b.score) {
+          return 1;
+        } else {
+          return 0;
+        }
+      });
   }, [game]);
 
   return (
@@ -258,7 +296,8 @@ export const Game: FC<GameProps> = (props) => {
             {playerScores.map((p) => {
               return (
                 <GameOverPlayer key={p.id}>
-                  {p.name}: ${p.score}
+                  <GameOverPlayerName>{p.name}</GameOverPlayerName>
+                  <GameOverPlayerScore>${p.score}</GameOverPlayerScore>
                 </GameOverPlayer>
               );
             })}
@@ -307,6 +346,8 @@ export const Game: FC<GameProps> = (props) => {
             {me == null ? null : (
               <Player
                 player={me}
+                showMoney={true}
+                active={me.id === turn.state.playerId}
                 turn={
                   me?.id === turn.state.playerId ? (
                     <Turn turn={turn} endTurn={endTurn} />
@@ -326,6 +367,7 @@ export const Game: FC<GameProps> = (props) => {
               <Player
                 key={player.id}
                 player={player}
+                showMoney={false}
                 active={isActive}
               ></Player>
             );

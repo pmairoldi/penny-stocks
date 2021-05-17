@@ -14,6 +14,7 @@ export interface Board {
   setMarker: (row: number, column: number, marker: Marker) => Board;
   canPlaceMarker: (row: number, column: number, marker: Marker) => boolean;
   hasActionTilesRemaining: () => boolean;
+  tileAt(row: number, column: number): Tile;
 }
 
 const countForRow = (row: number) => {
@@ -257,8 +258,14 @@ const hasActionTilesRemaining = (state: BoardState) => {
       return acc.concat(...tiles);
     }, new Array<Tile>());
 
-    console.log(actionsTiles);
     return actionsTiles.length > 0;
+  };
+};
+
+const tileAt = (state: BoardState) => {
+  return (rowIndex: number, columnIndex: number) => {
+    const tile = state.rows[rowIndex][columnIndex];
+    return tile;
   };
 };
 
@@ -294,6 +301,7 @@ export function boardFromState(state: BoardState): Board {
     setMarker: setMarker(state),
     canPlaceMarker: canPlaceMarker(state),
     hasActionTilesRemaining: hasActionTilesRemaining(state),
+    tileAt: tileAt(state),
   };
 }
 
@@ -311,6 +319,7 @@ export function boardFromJSON(json: BoardDTO): Board {
     setMarker: setMarker(state),
     canPlaceMarker: canPlaceMarker(state),
     hasActionTilesRemaining: hasActionTilesRemaining(state),
+    tileAt: tileAt(state),
   };
 }
 

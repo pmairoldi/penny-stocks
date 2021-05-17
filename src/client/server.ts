@@ -1,9 +1,9 @@
-import { Game, Player } from "../server/model";
+import { Action, Game, Player } from "../server/model";
 
 export interface Session {
   me: Player;
   game: Game;
-  update: (game: Game) => void;
+  update: (action: Action) => void;
   cleanup: () => void;
 }
 

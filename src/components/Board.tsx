@@ -1,13 +1,12 @@
-import React, { FC, useCallback, useMemo, useRef } from "react";
+import { FC, useCallback, useMemo, useRef } from "react";
 import styled from "styled-components";
 import { useScale } from "../hooks";
-import { Modifier } from "../server/model";
 import { Game } from "../server/model/game";
 import { DefaultTile, ModifierTile, StartTile } from "./Tile";
 
 interface BoardProps {
   game: Game;
-  placeMarker: (row: number, column: number, modifier?: Modifier) => void;
+  placeMarker: (row: number, column: number) => void;
 }
 
 const BoardContainer = styled.div<{ scale: number }>`
@@ -50,8 +49,8 @@ export const Board: FC<BoardProps & { className?: string }> = (props) => {
   }, [state]);
 
   const onTileClick = useCallback(
-    (row: number, column: number, modifier?: Modifier) => {
-      placeMarker(row, column, modifier);
+    (row: number, column: number) => {
+      placeMarker(row, column);
     },
     [placeMarker]
   );
