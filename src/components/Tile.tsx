@@ -2,6 +2,7 @@ import { FC, useCallback, useMemo } from "react";
 import styled, { css } from "styled-components";
 import { MarkerDTO, ModifierDTO } from "../server/dto";
 import { Marker } from "./Marker";
+import { textForModifier } from "./util";
 
 interface DefaultTileProps {
   row: number;
@@ -105,26 +106,7 @@ export const ModifierTile: FC<ModifierTileProps> = (props) => {
   }, [modifier]);
 
   const modifierText = useMemo(() => {
-    switch (modifier) {
-      case "crash":
-        return "Crash";
-      case "payday":
-        return "Dividend";
-      case "plus-1":
-        return "+1";
-      case "plus-2":
-        return "+2";
-      case "plus-3":
-        return "+3";
-      case "plus-5":
-        return "+5";
-      case "minus-1":
-        return "-1";
-      case "minus-2":
-        return "-2";
-      case "minus-3":
-        return "-3";
-    }
+    return textForModifier(modifier);
   }, [modifier]);
 
   return (

@@ -2,6 +2,7 @@ import { FC, useCallback, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { useEventListener } from "../hooks";
 import { GameLogEntryDTO, PlayerDTO } from "../server/dto";
+import { textForModifier } from "./util";
 
 interface GameLogProps {
   players: PlayerDTO[];
@@ -65,7 +66,9 @@ const GameLogEntry: FC<GameLogEntryProps & { className?: string }> = (
       case "place-marker":
         return log.event.modifier == null
           ? `${playerName} placed a ${log.event.marker} marker.`
-          : `${playerName} placed a ${log.event.marker} marker on ${log.event.modifier}.`;
+          : `${playerName} placed a ${
+              log.event.marker
+            } marker on ${textForModifier(log.event.modifier).toLowerCase()}.`;
 
       case "end-turn":
         return `${playerName} ended turn.`;
