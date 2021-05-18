@@ -1,6 +1,7 @@
 export * from "./actions";
 export * from "./board";
 export * from "./game";
+export * from "./game-log";
 export * from "./marker";
 export * from "./modifier";
 export * from "./player";

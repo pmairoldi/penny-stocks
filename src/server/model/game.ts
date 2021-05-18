@@ -21,6 +21,7 @@ interface GameState {
 export interface Game {
   state: GameState;
   id: string;
+  canApply: (action: Action) => boolean;
   applyAction: (action: Action) => Game;
   addPlayer: (player: Player) => Game;
   removePlayer: (player: Player) => Game;
@@ -126,25 +127,25 @@ function getModifierFor(
 }
 
 const placeMarker = (state: GameState) => {
-  return (playerId: string, row: number, column: number): Game => {
+  return (playerId: string, row: number, column: number): Game | null => {
     const { turn, board, prices, players } = state;
     if (turn == null) {
-      return gameFromState(state);
+      return null;
     }
 
     const { state: turnState } = turn;
 
     if (turnState.playerId !== playerId) {
-      return gameFromState(state);
+      return null;
     }
 
     if (turnState.marker == null) {
-      return gameFromState(state);
+      return null;
     }
 
     const marker = turnState.marker;
     if (!board.canPlaceMarker(row, column, marker)) {
-      return gameFromState(state);
+      return null;
     }
 
     const modifier = getModifierFor(board, row, column);
@@ -204,11 +205,11 @@ const placeMarker = (state: GameState) => {
 };
 
 const endTurn = (state: GameState) => {
-  return (playerId: string): Game => {
+  return (playerId: string): Game | null => {
     const { turn, players, markers } = state;
 
     if (turn == null || turn.state.playerId !== playerId) {
-      return gameFromState(state);
+      return null;
     }
 
     const playerIndex = players.findIndex((p) => p.id === playerId);
@@ -240,26 +241,26 @@ const endTurn = (state: GameState) => {
 };
 
 const buyStock = (state: GameState) => {
-  return (playerId: string, marker: Marker): Game => {
+  return (playerId: string, marker: Marker): Game | null => {
     const { turn, players } = state;
 
     if (turn == null || turn.state.playerId !== playerId) {
-      return gameFromState(state);
+      return null;
     }
 
     if (!turn.canMakeTrade()) {
-      return gameFromState(state);
+      return null;
     }
 
     const player = players.find((p) => p.id === playerId);
     if (player == null) {
-      return gameFromState(state);
+      return null;
     }
 
     const { prices } = state;
     const price = prices.state[marker];
     if (player.state.money < price.value) {
-      return gameFromState(state);
+      return null;
     }
 
     const updatedPlayers = players.map((p) => {
@@ -281,27 +282,27 @@ const buyStock = (state: GameState) => {
 };
 
 const sellStock = (state: GameState) => {
-  return (playerId: string, marker: Marker): Game => {
+  return (playerId: string, marker: Marker): Game | null => {
     const { turn, players } = state;
 
     if (turn == null || turn.state.playerId !== playerId) {
-      return gameFromState(state);
+      return null;
     }
 
     if (!turn.canMakeTrade()) {
-      return gameFromState(state);
+      return null;
     }
 
     const player = players.find((p) => p.id === playerId);
     if (player == null) {
-      return gameFromState(state);
+      return null;
     }
 
     const { prices } = state;
     const price = prices.state[marker];
 
     if (player.state.stocks[marker] < 1) {
-      return gameFromState(state);
+      return null;
     }
 
     const updatedPlayers = players.map((p) => {
@@ -322,21 +323,43 @@ const sellStock = (state: GameState) => {
   };
 };
 
-const applyAction = (state: GameState) => {
+const canApply = (state: GameState) => {
+  return (action: Action) => {
+    const applied = executeAction(state)(action);
+    if (applied != null) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+};
+
+const executeAction = (state: GameState) => {
   return (action: Action) => {
     switch (action.type) {
-      case "place-marker":
+      case "place-marker": {
         return placeMarker(state)(action.playerId, action.row, action.column);
+      }
 
-      case "end-turn":
+      case "end-turn": {
         return endTurn(state)(action.playerId);
+      }
 
-      case "buy":
+      case "buy": {
         return buyStock(state)(action.playerId, action.marker);
+      }
 
-      case "sell":
+      case "sell": {
         return sellStock(state)(action.playerId, action.marker);
+      }
     }
+  };
+};
+
+const applyAction = (state: GameState) => {
+  return (action: Action) => {
+    const applied = executeAction(state)(action);
+    return applied == null ? gameFromState(state) : applied;
   };
 };
 
@@ -447,6 +470,7 @@ export function gameFromState(state: GameState): Game {
   return {
     state: state,
     id: state.id,
+    canApply: canApply(state),
     applyAction: applyAction(state),
     addPlayer: addPlayer(state),
     removePlayer: removePlayer(state),

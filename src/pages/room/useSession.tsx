@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { server, Session } from "../../client";
-import { GameDTO } from "../../server/dto";
+import { GameDTO, GameLogEntryDTO } from "../../server/dto";
 
 export interface UseSessionValue {
   session: Session | undefined;
@@ -23,11 +23,21 @@ export function useSession(notFound: () => void): UseSessionValue {
     });
   }, []);
 
+  const onGameLogRecieved = useCallback((log: GameLogEntryDTO) => {
+    setSession((session) => {
+      if (session != null) {
+        return { ...session, logs: [log, ...session.logs] };
+      } else {
+        return undefined;
+      }
+    });
+  }, []);
+
   const create = useCallback(
     (name: string) => {
       setLoading(true);
       server
-        .create(name, onUpdate)
+        .create(name, onUpdate, onGameLogRecieved)
         .then((session) => {
           setSession(session);
         })
@@ -39,14 +49,14 @@ export function useSession(notFound: () => void): UseSessionValue {
           setLoading(false);
         });
     },
-    [setSession, setLoading, onUpdate, notFound]
+    [setSession, setLoading, onUpdate, onGameLogRecieved, notFound]
   );
 
   const join = useCallback(
     (id: string, name: string) => {
       setLoading(true);
       server
-        .join(id, name, onUpdate)
+        .join(id, name, onUpdate, onGameLogRecieved)
         .then((session) => {
           setSession(session);
         })
@@ -58,7 +68,7 @@ export function useSession(notFound: () => void): UseSessionValue {
           setLoading(false);
         });
     },
-    [setSession, setLoading, onUpdate, notFound]
+    [setSession, setLoading, onUpdate, onGameLogRecieved, notFound]
   );
 
   return { session, loading, create: create, join: join };

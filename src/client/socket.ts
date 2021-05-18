@@ -1,5 +1,5 @@
 import { io } from "socket.io-client";
-import { ActionDTO, GameDTO, PlayerDTO } from "../server/dto";
+import { ActionDTO, GameDTO, GameLogEntryDTO, PlayerDTO } from "../server/dto";
 import { Server } from "./server";
 
 const URL =
@@ -16,7 +16,7 @@ if (process.env.NODE_ENV === "development") {
 }
 
 export const server: Server = {
-  create: (name, onUpdate) => {
+  create: (name, onUpdate, gameLogRecieved) => {
     return new Promise((resolve) => {
       socket.auth = { username: name };
       socket.connect();
@@ -41,6 +41,7 @@ export const server: Server = {
         resolve({
           me: dto.me,
           game: dto.game,
+          logs: [],
           update: update,
           start: start,
           playAgain: playAgain,
@@ -52,10 +53,14 @@ export const server: Server = {
         onUpdate(dto);
       });
 
+      socket.on("log", (dto: GameLogEntryDTO) => {
+        gameLogRecieved(dto);
+      });
+
       socket.emit("create");
     });
   },
-  join: (id, name, onUpdate) => {
+  join: (id, name, onUpdate, gameLogRecieved) => {
     return new Promise((resolve, rejects) => {
       socket.auth = { username: name };
       socket.connect();
@@ -72,6 +77,7 @@ export const server: Server = {
         resolve({
           me: dto.me,
           game: dto.game,
+          logs: [],
           update: update,
           cleanup: cleanup,
         });
@@ -79,6 +85,10 @@ export const server: Server = {
 
       socket.on("update", (dto: GameDTO) => {
         onUpdate(dto);
+      });
+
+      socket.on("log", (dto: GameLogEntryDTO) => {
+        gameLogRecieved(dto);
       });
 
       socket.on("not found", () => {

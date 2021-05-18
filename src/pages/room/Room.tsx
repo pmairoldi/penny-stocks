@@ -43,7 +43,12 @@ export const Room: FC = () => {
           onPlayAgain={session.playAgain}
         />
       ) : (
-        <Game me={session.me} game={session.game} updateGame={session.update} />
+        <Game
+          me={session.me}
+          game={session.game}
+          logs={session.logs}
+          updateGame={session.update}
+        />
       )}
     </>
   );

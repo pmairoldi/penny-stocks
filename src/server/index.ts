@@ -1,6 +1,6 @@
 import { createServer } from "http";
 import { Server } from "socket.io";
-import { ActionDTO } from "./dto";
+import { ActionDTO, GameLogEntryDTO } from "./dto";
 import {
   actionFromJSON,
   createGame,
@@ -9,6 +9,7 @@ import {
   jsonFromGame,
   jsonFromPlayer,
 } from "./model";
+import { gameLogFromAction } from "./model/game-log";
 
 const httpServer = createServer();
 
@@ -104,12 +105,25 @@ io.on("connection", (socket) => {
 
     if (game != null) {
       const action = actionFromJSON(actionDTO, socket.id);
-      const updated = game.applyAction(action);
-      games.set(id, updated);
+      if (game.canApply(action)) {
+        const updated = game.applyAction(action);
+        games.set(id, updated);
 
-      const gameDTO = jsonFromGame(updated);
-      socket.emit("update", gameDTO);
-      socket.broadcast.emit("update", gameDTO);
+        const gameDTO = jsonFromGame(updated);
+        socket.emit("update", gameDTO);
+        socket.broadcast.emit("update", gameDTO);
+
+        const event = gameLogFromAction(action, updated);
+        if (event != null) {
+          const log: GameLogEntryDTO = {
+            event: event,
+            playerId: socket.id,
+            timestamp: new Date().toISOString(),
+          };
+          socket.emit("log", log);
+          socket.broadcast.emit("log", log);
+        }
+      }
     }
   });
 

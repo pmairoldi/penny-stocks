@@ -1,7 +1,14 @@
 import { FC, useCallback, useMemo } from "react";
 import styled from "styled-components";
-import { ActionDTO, GameDTO, MarkerDTO, PlayerDTO } from "../server/dto";
+import {
+  ActionDTO,
+  GameDTO,
+  GameLogEntryDTO,
+  MarkerDTO,
+  PlayerDTO,
+} from "../server/dto";
 import { Board } from "./Board";
+import { GameLog } from "./GameLog";
 import { Player } from "./Player";
 import { PlayersDropdown } from "./PlayersDropdown";
 import { Price } from "./Price";
@@ -10,6 +17,7 @@ import { Turn } from "./Turn";
 interface GameProps {
   me: PlayerDTO;
   game: GameDTO;
+  logs: GameLogEntryDTO[];
   updateGame: (action: ActionDTO) => void;
 }
 
@@ -60,9 +68,6 @@ const PlayersContainer = styled.div`
 `;
 
 const MarkerCount = styled.div`
-  position: absolute;
-  left: 16px;
-  bottom: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -74,8 +79,20 @@ const MarkerCount = styled.div`
   border: 1px solid white;
 `;
 
+const InfoContainer = styled.div`
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  display: flex;
+  flex-direction: column;
+
+  > * ~ * {
+    margin-top: 8px;
+  }
+`;
+
 export const Game: FC<GameProps> = (props) => {
-  const { me: sessionPlayer, game, updateGame } = props;
+  const { me: sessionPlayer, game, logs, updateGame } = props;
 
   const me = useMemo(() => {
     return game.players.find((p) => p.id === sessionPlayer.id);
@@ -277,7 +294,10 @@ export const Game: FC<GameProps> = (props) => {
             ></Player>
           )}
         </DataContainer>
-        <MarkerCount>{game.markers.length}</MarkerCount>
+        <InfoContainer>
+          <GameLog players={game.players} logs={logs}></GameLog>
+          <MarkerCount>{game.markers.length}</MarkerCount>
+        </InfoContainer>
       </PlayContainer>
       <PlayersContainer>
         <PlayersDropdown>

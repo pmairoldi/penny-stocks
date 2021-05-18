@@ -4,6 +4,7 @@ export const Input = styled.input`
   border-radius: 16px;
   padding: 16px;
   text-decoration: none;
+  width: 0px;
   min-width: 200px;
   font-size: 1rem;
   text-align: left;
