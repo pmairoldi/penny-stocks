@@ -59,19 +59,31 @@ interface ModifierTileProps {
   onClick: (row: number, column: number) => void;
 }
 
-const StyledModifierTile = styled(StyledTile)<{ isSpecial: boolean }>`
+const StyledModifierTile = styled(StyledTile)<{
+  kind: "green" | "red" | "blue";
+}>`
   border-width: 1px;
   border-style: solid;
-  ${(props) =>
-    props.isSpecial
-      ? css`
-          background-color: #d69a9c;
-          border-color: #c77478;
-        `
-      : css`
+  ${(props) => {
+    switch (props.kind) {
+      case "green":
+        return css`
           background-color: #96c4c0;
           border-color: #48a9a6;
-        `}
+        `;
+      case "red":
+        return css`
+          background-color: #d69a9c;
+          border-color: #c77478;
+        `;
+      case "blue":
+        return css`
+          background-color: #9a9bd6;
+          border-color: #7479c7;
+          color: #ffffff;
+        `;
+    }
+  }}
 `;
 
 const StyledModiferText = styled.div``;
@@ -98,24 +110,44 @@ export const ModifierTile: FC<ModifierTileProps> = (props) => {
     switch (modifier) {
       case "crash":
       case "payday":
-      case "plus-5":
         return true;
       default:
         return false;
     }
   }, [modifier]);
 
+  const kind = useMemo(() => {
+    switch (modifier) {
+      case "plus-1":
+      case "plus-2":
+      case "plus-3":
+        return "green";
+      case "plus-5":
+        return "blue";
+      case "minus-1":
+      case "minus-2":
+      case "minus-3":
+        return "red";
+      case "crash":
+        return marker != null ? "red" : "blue";
+      case "payday":
+        return marker != null ? "green" : "blue";
+    }
+  }, [modifier, marker]);
+
   const modifierText = useMemo(() => {
     return textForModifier(modifier);
   }, [modifier]);
 
   return (
-    <StyledModifierTile
-      onClick={onClick}
-      disabled={disabled}
-      isSpecial={isSpecial}
-    >
-      <StyledModiferText>{modifierText}</StyledModiferText>
+    <StyledModifierTile onClick={onClick} disabled={disabled} kind={kind}>
+      {isSpecial ? (
+        marker != null ? (
+          <StyledModiferText>{modifierText}</StyledModiferText>
+        ) : null
+      ) : (
+        <StyledModiferText>{modifierText}</StyledModiferText>
+      )}
       {marker != null ? <StyledTileMarker marker={marker} /> : null}
     </StyledModifierTile>
   );
