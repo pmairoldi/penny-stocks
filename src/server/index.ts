@@ -1,5 +1,11 @@
 import { createServer } from "http";
 import { Server } from "socket.io";
+import {
+  adjectives,
+  animals,
+  colors,
+  uniqueNamesGenerator,
+} from "unique-names-generator";
 import { ActionDTO, GameLogEntryDTO } from "./dto";
 import {
   actionFromJSON,
@@ -32,32 +38,37 @@ const games = new Map<string, Game>();
 
 io.on("connection", (socket) => {
   socket.on("create", () => {
-    const id = `${Math.floor(Math.random() * 101)}`;
+    const id = uniqueNamesGenerator({
+      dictionaries: [adjectives, colors, animals],
+      separator: "-",
+      style: "lowerCase",
+      length: 3,
+    });
 
-    const me = createPlayer(socket.id, socket.data.username);
-    const game = createGame(id).addPlayer(me);
+    const player = createPlayer(socket.id, socket.data.username);
+    const game = createGame(id).addPlayer(player);
 
     games.set(id, game);
 
     socket.emit("created", {
-      me: jsonFromPlayer(me),
+      me: jsonFromPlayer(player),
       game: jsonFromGame(game),
     });
   });
 
   socket.on("join", ({ id }: { id: string }) => {
-    const me = createPlayer(socket.id, socket.data.username);
     const game = games.get(id);
 
     if (game == null) {
       socket.emit("not found");
     } else {
-      const updated = game.addPlayer(me);
+      const player = createPlayer(socket.id, socket.data.username);
+      const updated = game.addPlayer(player);
 
       games.set(id, updated);
 
       socket.emit("joined", {
-        me: jsonFromPlayer(me),
+        me: jsonFromPlayer(player),
         game: jsonFromGame(updated),
       });
 
