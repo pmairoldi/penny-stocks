@@ -3,7 +3,7 @@ import { Action } from "./actions";
 import { Board, boardFromJSON, createBoard, jsonFromBoard } from "./board";
 import { Marker } from "./marker";
 import { Modifier, PlayerModifier } from "./modifier";
-import { jsonFromPlayer, Player, playerFromJSON } from "./player";
+import { createPlayer, jsonFromPlayer, Player, playerFromJSON } from "./player";
 import { createPrices, jsonFromPrices, Prices, pricesFromJSON } from "./prices";
 import { createTurn, jsonFromTurn, Turn, turnFromJSON } from "./turn";
 import { shuffle } from "./utils";
@@ -445,7 +445,7 @@ const restart = (state: GameState) => {
     let updated = createGame(id);
 
     players.forEach((p) => {
-      updated = updated.addPlayer(p);
+      updated = updated.addPlayer(createPlayer(p.id, p.name));
     });
 
     return updated.start();
