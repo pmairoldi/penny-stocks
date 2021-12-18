@@ -14,6 +14,7 @@ type PricesState = {
 
 export interface Prices {
   state: PricesState;
+  valueFor(marker: Marker): number;
   updatePrice(marker: Marker, by: number): Prices;
 }
 
@@ -24,6 +25,13 @@ const minPrice = -5;
 function valueFromRawValue(rawValue: number) {
   return Math.max(0, rawValue);
 }
+
+const valueFor = (state: PricesState) => {
+  return (marker: Marker) => {
+    const price = state[marker];
+    return price.value;
+  };
+};
 
 const updatePrice = (state: PricesState) => {
   return (marker: Marker, by: number): Prices => {
@@ -75,6 +83,7 @@ export function createPrices(): Prices {
 export function pricesFromState(state: PricesState): Prices {
   return {
     state: state,
+    valueFor: valueFor(state),
     updatePrice: updatePrice(state),
   };
 }

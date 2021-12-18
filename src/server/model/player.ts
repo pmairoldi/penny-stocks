@@ -1,5 +1,6 @@
 import { PlayerDTO } from "../dto";
 import { Marker } from "./marker";
+import { Prices } from "./prices";
 
 interface PlayerState {
   id: string;
@@ -14,16 +15,19 @@ export interface Player {
   state: PlayerState;
   id: string;
   name: string;
-  crash: (marker: Marker, price: number) => Player;
-  payday: (marker: Marker, price: number) => Player;
-  buy: (marker: Marker, price: number) => Player;
-  sell: (marker: Marker, price: number) => Player;
+  crash: (marker: Marker, prices: Prices) => Player;
+  payday: (marker: Marker, prices: Prices) => Player;
+  buy: (marker: Marker, prices: Prices) => Player;
+  canBuy: (marker: Marker, prices: Prices) => boolean;
+  sell: (marker: Marker, prices: Prices) => Player;
+  canSell: (marker: Marker) => boolean;
 }
 
 const crash = (state: PlayerState) => {
-  return (marker: Marker, price: number): Player => {
+  return (marker: Marker, prices: Prices): Player => {
     const { money, stocks } = state;
     const stock = stocks[marker];
+    const price = prices.valueFor(marker);
 
     const updatedMoney = money - stock * price;
     const updated = { ...state, money: updatedMoney };
@@ -33,9 +37,10 @@ const crash = (state: PlayerState) => {
 };
 
 const payday = (state: PlayerState) => {
-  return (marker: Marker, price: number): Player => {
+  return (marker: Marker, prices: Prices): Player => {
     const { money, stocks } = state;
     const stock = stocks[marker];
+    const price = prices.valueFor(marker);
 
     const updatedMoney = money + stock * price;
     const updated = { ...state, money: updatedMoney };
@@ -45,8 +50,9 @@ const payday = (state: PlayerState) => {
 };
 
 const buy = (state: PlayerState) => {
-  return (marker: Marker, price: number) => {
+  return (marker: Marker, prices: Prices) => {
     const { money, stocks } = state;
+    const price = prices.valueFor(marker);
 
     const updatedMoney = money - price;
     const updatedStocks = { ...stocks };
@@ -62,9 +68,18 @@ const buy = (state: PlayerState) => {
   };
 };
 
+const canBuy = (state: PlayerState) => {
+  return (marker: Marker, prices: Prices) => {
+    const money = state.money;
+    const price = prices.valueFor(marker);
+    return price <= 0 ? true : money >= price;
+  };
+};
+
 const sell = (state: PlayerState) => {
-  return (marker: Marker, price: number) => {
+  return (marker: Marker, prices: Prices) => {
     const { money, stocks } = state;
+    const price = prices.valueFor(marker);
 
     const updatedMoney = money + price;
     const updatedStocks = { ...stocks };
@@ -80,11 +95,18 @@ const sell = (state: PlayerState) => {
   };
 };
 
+const canSell = (state: PlayerState) => {
+  return (marker: Marker) => {
+    const stocks = state.stocks;
+    return stocks[marker] > 0;
+  };
+};
+
 export function createPlayer(id: string, name: string): Player {
   const state: PlayerState = {
     id: id,
     name: name,
-    money: 20,
+    money: -5,
     stocks: { red: 1, blue: 1, purple: 1, yellow: 1 },
   };
 
@@ -99,7 +121,9 @@ export function playerFromState(state: PlayerState): Player {
     crash: crash(state),
     payday: payday(state),
     buy: buy(state),
+    canBuy: canBuy(state),
     sell: sell(state),
+    canSell: canSell(state),
   };
 }
 

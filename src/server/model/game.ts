@@ -158,18 +158,16 @@ const placeMarker = (state: GameState) => {
         ? prices.updatePrice(marker, pricesUpdate)
         : prices;
 
-    const price = updatedPrices.state[marker];
-
     const actionsUpate = actionModifier(modifier);
     const updatedPlayers =
       actionsUpate !== false
         ? players.map((p) => {
             switch (actionsUpate) {
               case "crash":
-                return p.crash(marker, price.value);
+                return p.crash(marker, updatedPrices);
 
               case "payday":
-                return p.payday(marker, price.value);
+                return p.payday(marker, updatedPrices);
 
               default:
                 return p;
@@ -258,14 +256,13 @@ const buyStock = (state: GameState) => {
     }
 
     const { prices } = state;
-    const price = prices.state[marker];
-    if (player.state.money < price.value) {
+    if (!player.canBuy(marker, prices)) {
       return null;
     }
 
     const updatedPlayers = players.map((p) => {
       if (p.id === turn.state.playerId) {
-        return p.buy(marker, price.value);
+        return p.buy(marker, prices);
       } else {
         return p;
       }
@@ -299,15 +296,14 @@ const sellStock = (state: GameState) => {
     }
 
     const { prices } = state;
-    const price = prices.state[marker];
 
-    if (player.state.stocks[marker] < 1) {
+    if (!player.canSell(marker)) {
       return null;
     }
 
     const updatedPlayers = players.map((p) => {
       if (p.id === turn.state.playerId) {
-        return p.sell(marker, price.value);
+        return p.sell(marker, prices);
       } else {
         return p;
       }
