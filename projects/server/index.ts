@@ -16,7 +16,7 @@ import {
   gameLogFromAction,
   jsonFromGame,
   jsonFromPlayer,
-} from "../shared";
+} from "./shared";
 
 const httpServer = createServer();
 

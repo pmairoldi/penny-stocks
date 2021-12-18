@@ -6,7 +6,7 @@ import {
   GameLogEntryDTO,
   MarkerDTO,
   PlayerDTO,
-} from "../../../shared/dto";
+} from "../../../server/shared/dto";
 import { Board } from "./Board";
 import { GameLog } from "./GameLog";
 import { Player } from "./Player";

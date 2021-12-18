@@ -1,7 +1,7 @@
 import { FC, useCallback, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import { useEventListener } from "../hooks";
-import { GameLogEntryDTO, PlayerDTO } from "../../../shared/dto";
+import { GameLogEntryDTO, PlayerDTO } from "../../../server/shared/dto";
 import { textForModifier } from "./util";
 
 interface GameLogProps {

@@ -1,6 +1,6 @@
 import { FC, useCallback, useMemo } from "react";
 import styled, { css } from "styled-components";
-import { MarkerDTO, PriceDTO } from "../../../shared/dto";
+import { MarkerDTO, PriceDTO } from "../../../server/shared/dto";
 import { Button } from "./Button";
 
 interface PriceProps {

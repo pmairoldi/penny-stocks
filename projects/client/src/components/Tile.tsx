@@ -1,6 +1,6 @@
 import { FC, useCallback, useMemo } from "react";
 import styled, { css } from "styled-components";
-import { MarkerDTO, ModifierDTO } from "../../../shared/dto";
+import { MarkerDTO, ModifierDTO } from "../../../server/shared/dto";
 import { Marker } from "./Marker";
 import { textForModifier } from "./util";
 

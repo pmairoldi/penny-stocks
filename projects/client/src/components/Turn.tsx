@@ -1,6 +1,6 @@
 import { FC, useMemo } from "react";
 import styled from "styled-components";
-import { TurnDTO } from "../../../shared/dto";
+import { TurnDTO } from "../../../server/shared/dto";
 import { Button } from "./Button";
 import { Marker } from "./Marker";
 

@@ -1,6 +1,6 @@
 import { FC, ReactElement } from "react";
 import styled from "styled-components";
-import { PlayerDTO } from "../../../shared/dto";
+import { PlayerDTO } from "../../../server/shared/dto";
 import { Marker } from "./Marker";
 
 interface PlayerProps {

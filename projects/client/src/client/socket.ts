@@ -4,7 +4,7 @@ import {
   GameDTO,
   GameLogEntryDTO,
   PlayerDTO,
-} from "../../../shared/dto";
+} from "../../../server/shared/dto";
 import { Server } from "./server";
 
 const URL =

@@ -1,5 +1,5 @@
 import styled, { css } from "styled-components";
-import { MarkerDTO } from "../../../shared/dto";
+import { MarkerDTO } from "../../../server/shared/dto";
 
 interface MarkerProps {
   marker: MarkerDTO;

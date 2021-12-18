@@ -3,7 +3,7 @@ import {
   GameDTO,
   GameLogEntryDTO,
   PlayerDTO,
-} from "../../../shared/dto";
+} from "../../../server/shared/dto";
 
 export interface Session {
   me: PlayerDTO;

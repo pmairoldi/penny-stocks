@@ -1,7 +1,7 @@
 import { FC, useCallback, useMemo, useRef } from "react";
 import styled from "styled-components";
 import { useScale } from "../hooks";
-import { GameDTO } from "../../../shared/dto";
+import { GameDTO } from "../../../server/shared/dto";
 import { DefaultTile, ModifierTile, StartTile } from "./Tile";
 
 interface BoardProps {

@@ -1,6 +1,6 @@
 import { FC, useCallback, useMemo } from "react";
 import styled from "styled-components";
-import { GameDTO, PlayerDTO, PricesDTO } from "../../../shared/dto";
+import { GameDTO, PlayerDTO, PricesDTO } from "../../../server/shared/dto";
 import { LargeButton } from "./Button";
 
 interface GameOverProps {
