@@ -179,11 +179,14 @@ export const Game: FC<GameProps> = (props) => {
   >(() => {
     if (turn != null && turn.playerId === me?.id && turn.tradesRemaining > 0) {
       const money = me.money;
+      const canBuy = (money: number, value: number) => {
+        return value <= 0 ? true : money >= value;
+      };
       return {
-        blue: money >= prices.blue.value,
-        purple: money >= prices.purple.value,
-        red: money >= prices.red.value,
-        yellow: money >= prices.yellow.value,
+        blue: canBuy(money, prices.blue.value),
+        purple: canBuy(money, prices.purple.value),
+        red: canBuy(money, prices.red.value),
+        yellow: canBuy(money, prices.yellow.value),
       };
     } else {
       return { blue: false, purple: false, red: false, yellow: false };
