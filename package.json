@@ -10,10 +10,12 @@
   },
   "scripts": {
     "prepare": "husky install",
-    "install": "",
-    "run-app": "",
-    "run-server": "",
-    "deploy-server": "git subtree push --prefix src/server heroku main"
+    "install": "npm run install:client && npm run install:server",
+    "install:client": "cd ./projects/client && npm install",
+    "start:client": "cd ./projects/client && npm start",
+    "install:server": "cd ./projects/server && npm install",
+    "start:server": "cd ./projects/server && npm start",
+    "deploy-server": "git subtree push --prefix projects/server heroku main"
   },
   "devDependencies": {
     "lint-staged": "^10.5.4",
