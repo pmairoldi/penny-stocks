@@ -14,8 +14,7 @@
     "install:client": "cd ./projects/client && npm install",
     "start:client": "cd ./projects/client && npm start",
     "install:server": "cd ./projects/server && npm install",
-    "start:server": "cd ./projects/server && npm start",
-    "deploy-server": "git subtree push --prefix projects/server heroku main"
+    "start:server": "cd ./projects/server && npm start"
   },
   "devDependencies": {
     "lint-staged": "^10.5.4",
