@@ -106,7 +106,7 @@ export function createPlayer(id: string, name: string): Player {
   const state: PlayerState = {
     id: id,
     name: name,
-    money: -5,
+    money: 20,
     stocks: { red: 1, blue: 1, purple: 1, yellow: 1 },
   };
 

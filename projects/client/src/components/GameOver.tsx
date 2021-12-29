@@ -1,7 +1,14 @@
-import { FC, useCallback, useMemo } from "react";
+import { FC, Fragment, useCallback, useMemo } from "react";
 import styled from "styled-components";
-import { GameDTO, PlayerDTO, PricesDTO } from "../../../server/shared/dto";
+import {
+  GameDTO,
+  MarkerDTO,
+  PlayerDTO,
+  PricesDTO,
+} from "../../../server/shared/dto";
 import { LargeButton } from "./Button";
+import { HSpacer, HStack, VSpacer, VStack } from "./layouts";
+import { Marker } from "./Marker";
 
 interface GameOverProps {
   me: PlayerDTO;
@@ -29,9 +36,7 @@ const GameOverTitle = styled.div`
   text-align: center;
 `;
 
-const GameOverPlayers = styled.div`
-  display: flex;
-  flex-direction: column;
+const GameOverPlayers = styled(VStack)`
   border: 2px solid #d4b483;
   width: 100%;
   max-height: 40vh;
@@ -43,14 +48,10 @@ const GameOverPlayers = styled.div`
   }
 `;
 
-const GameOverPlayer = styled.div`
-  display: flex;
+const GameOverPlayer = styled(VStack)`
+  width: 100%;
   padding: 8px;
   background-color: #dccaaf;
-
-  > * ~ * {
-    margin-left: 8px;
-  }
 `;
 
 const GameOverPlayerName = styled.div`
@@ -64,6 +65,14 @@ const GameOverPlayerScore = styled.div`
   flex: none;
 `;
 
+const PlayerMarker = styled(Marker)`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+`;
+
 export const GameOver: FC<GameOverProps> = (props) => {
   const { game, me, onPlayAgain } = props;
 
@@ -71,7 +80,7 @@ export const GameOver: FC<GameOverProps> = (props) => {
     const { prices } = game;
     return game.players
       .map((p) => {
-        return { id: p.id, name: p.name, score: score(p, prices) };
+        return { ...p, score: score(p, prices) };
       })
       .sort((a, b) => {
         if (a.score > b.score) {
@@ -97,11 +106,29 @@ export const GameOver: FC<GameOverProps> = (props) => {
         {playerScores.map((p) => {
           return (
             <GameOverPlayer key={p.id}>
-              <GameOverPlayerName>
-                {p.id === me.id ? <>&#10148;</> : null}
-                {p.name}
-              </GameOverPlayerName>
-              <GameOverPlayerScore>${p.score}</GameOverPlayerScore>
+              <HStack style={{ width: "100%" }}>
+                <GameOverPlayerName>
+                  {p.id === me.id ? <>&#10148;</> : null}
+                  {p.name}
+                </GameOverPlayerName>
+                <HSpacer min={10}></HSpacer>
+                <GameOverPlayerScore>${p.score}</GameOverPlayerScore>
+              </HStack>
+              <VSpacer min={10} max={10}></VSpacer>
+              <HStack style={{ width: "100%" }}>
+                {Object.entries(p.stocks).map(([key, value], index, array) => {
+                  return (
+                    <Fragment key={key}>
+                      <PlayerMarker marker={key as MarkerDTO}>
+                        {value}
+                      </PlayerMarker>
+                      {index !== array.length - 1 ? (
+                        <HSpacer min={10}></HSpacer>
+                      ) : null}
+                    </Fragment>
+                  );
+                })}
+              </HStack>
             </GameOverPlayer>
           );
         })}

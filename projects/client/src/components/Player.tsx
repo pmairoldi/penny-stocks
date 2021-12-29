@@ -1,6 +1,6 @@
 import { FC, ReactElement } from "react";
 import styled from "styled-components";
-import { PlayerDTO } from "../../../server/shared/dto";
+import { MarkerDTO, PlayerDTO } from "../../../server/shared/dto";
 import { Marker } from "./Marker";
 
 interface PlayerProps {
@@ -66,10 +66,13 @@ export const Player: FC<PlayerProps> = (props) => {
         {showMoney ? <span>${player.money}</span> : null}
       </PlayerName>
       <StatsContainer>
-        <PlayerMarker marker="blue">{player.stocks.blue}</PlayerMarker>
-        <PlayerMarker marker="purple">{player.stocks.purple}</PlayerMarker>
-        <PlayerMarker marker="yellow">{player.stocks.yellow}</PlayerMarker>
-        <PlayerMarker marker="red">{player.stocks.red}</PlayerMarker>
+        {Object.entries(player.stocks).map(([key, value]) => {
+          return (
+            <PlayerMarker key={key} marker={key as MarkerDTO}>
+              {value}
+            </PlayerMarker>
+          );
+        })}
       </StatsContainer>
 
       {turn != null ? <TurnContainer>{turn}</TurnContainer> : null}
