@@ -51,6 +51,7 @@ io.on("connection", (socket) => {
 
     games.set(id, game);
 
+    socket.join(id);
     socket.emit("created", {
       me: jsonFromPlayer(player),
       game: jsonFromGame(game),
@@ -68,12 +69,12 @@ io.on("connection", (socket) => {
 
       games.set(id, updated);
 
+      socket.join(id);
       socket.emit("joined", {
         me: jsonFromPlayer(player),
         game: jsonFromGame(updated),
       });
-
-      socket.broadcast.emit("update", jsonFromGame(updated));
+      socket.broadcast.to(id).emit("update", jsonFromGame(updated));
     }
   });
 
@@ -89,8 +90,7 @@ io.on("connection", (socket) => {
 
       const gameDTO = jsonFromGame(updated);
 
-      socket.broadcast.emit("update", gameDTO);
-      socket.emit("update", gameDTO);
+      io.to(id).emit("update", gameDTO);
     }
   });
 
@@ -106,8 +106,7 @@ io.on("connection", (socket) => {
 
       const gameDTO = jsonFromGame(updated);
 
-      socket.broadcast.emit("update", gameDTO);
-      socket.emit("update", gameDTO);
+      io.to(id).emit("update", gameDTO);
     }
   });
 
@@ -122,8 +121,7 @@ io.on("connection", (socket) => {
         games.set(id, updated);
 
         const gameDTO = jsonFromGame(updated);
-        socket.emit("update", gameDTO);
-        socket.broadcast.emit("update", gameDTO);
+        io.to(id).emit("update", gameDTO);
 
         const event = gameLogFromAction(action, updated);
         if (event != null) {
@@ -132,8 +130,7 @@ io.on("connection", (socket) => {
             playerId: socket.id,
             timestamp: new Date().toISOString(),
           };
-          socket.emit("log", log);
-          socket.broadcast.emit("log", log);
+          io.to(id).emit("log", log);
         }
       }
     }
@@ -151,11 +148,9 @@ io.on("connection", (socket) => {
           games.delete(id);
         }
 
-        socket.broadcast.emit("update", jsonFromGame(updated));
+        socket.broadcast.to(id).emit("update", jsonFromGame(updated));
       }
     });
-
-    socket.broadcast.emit("user disconnected", socket.id);
   });
 });
 

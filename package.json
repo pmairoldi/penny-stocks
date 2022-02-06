@@ -14,7 +14,8 @@
     "install:client": "cd ./projects/client && npm install",
     "start:client": "cd ./projects/client && npm start",
     "install:server": "cd ./projects/server && npm install",
-    "start:server": "cd ./projects/server && npm start"
+    "start:server": "cd ./projects/server && npm start",
+    "start:server:debug": "cd ./projects/server && npm run start:debug"
   },
   "devDependencies": {
     "lint-staged": "^10.5.4",
