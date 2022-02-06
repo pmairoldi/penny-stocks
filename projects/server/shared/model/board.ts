@@ -1,5 +1,5 @@
 import { BoardDTO } from "../dto";
-import { Marker } from "./marker";
+import { Marker, PlacedMarker } from "./marker";
 import { Modifier } from "./modifier";
 import { Tile } from "./tile";
 import { getRandomItem, removeItem } from "./utils";
@@ -10,7 +10,7 @@ interface BoardState {
 
 export interface Board {
   state: BoardState;
-  setMarker: (row: number, column: number, marker: Marker) => Board;
+  setMarker: (row: number, column: number, marker: PlacedMarker) => Board;
   canPlaceMarker: (row: number, column: number, marker: Marker) => boolean;
   hasActionTilesRemaining: () => boolean;
   tileAt(row: number, column: number): Tile;
@@ -92,28 +92,28 @@ const tileAtRowColumn = (
       type: "start",
       row: row,
       column: column,
-      marker: "blue",
+      marker: { type: "blue", playerId: "" },
     };
   } else if (row === 2 && column === 8) {
     return {
       type: "start",
       row: row,
       column: column,
-      marker: "purple",
+      marker: { type: "purple", playerId: "" },
     };
   } else if (row === 10 && column === 0) {
     return {
       type: "start",
       row: row,
       column: column,
-      marker: "yellow",
+      marker: { type: "yellow", playerId: "" },
     };
   } else if (row === 10 && column === 8) {
     return {
       type: "start",
       row: row,
       column: column,
-      marker: "red",
+      marker: { type: "red", playerId: "" },
     };
   } else {
     return { type: "default", row: row, column: column, marker: null };
@@ -145,12 +145,12 @@ const canPlaceMarker = (state: BoardState) => {
 
     if (columnIndex - 1 >= 0) {
       const before = row[columnIndex - 1];
-      markers.push(before.marker);
+      markers.push(before.marker?.type ?? null);
     }
 
     if (columnIndex + 1 < row.length) {
       const after = row[columnIndex + 1];
-      markers.push(after.marker);
+      markers.push(after.marker?.type ?? null);
     }
 
     return markers;
@@ -166,22 +166,22 @@ const canPlaceMarker = (state: BoardState) => {
     if (row.length < currentRowSize) {
       if (columnIndex < row.length) {
         const rowBeforeColumn = row[columnIndex];
-        markers.push(rowBeforeColumn.marker);
+        markers.push(rowBeforeColumn.marker?.type ?? null);
       }
 
       if (columnIndex - 1 >= 0) {
         const rowBeforeColumnBefore = row[columnIndex - 1];
-        markers.push(rowBeforeColumnBefore.marker);
+        markers.push(rowBeforeColumnBefore.marker?.type ?? null);
       }
     } else {
       if (columnIndex < row.length) {
         const rowBeforeColumn = row[columnIndex];
-        markers.push(rowBeforeColumn.marker);
+        markers.push(rowBeforeColumn.marker?.type ?? null);
       }
 
       if (columnIndex + 1 >= 0) {
         const rowBeforeColumnAfter = row[columnIndex + 1];
-        markers.push(rowBeforeColumnAfter.marker);
+        markers.push(rowBeforeColumnAfter.marker?.type ?? null);
       }
     }
 
@@ -212,7 +212,7 @@ const canPlaceMarker = (state: BoardState) => {
   };
 };
 
-const updateTileMarker = (tile: Tile, marker: Marker) => {
+const updateTileMarker = (tile: Tile, marker: PlacedMarker): Tile => {
   switch (tile.type) {
     case "default":
       return { ...tile, marker: marker };
@@ -224,7 +224,7 @@ const updateTileMarker = (tile: Tile, marker: Marker) => {
 };
 
 const setMarker = (state: BoardState) => {
-  return (row: number, column: number, marker: Marker): Board => {
+  return (row: number, column: number, marker: PlacedMarker): Board => {
     const { rows } = state;
     const updatedRows = rows.slice();
     const tiles = updatedRows[row].slice();

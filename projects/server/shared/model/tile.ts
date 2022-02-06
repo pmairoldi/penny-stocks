@@ -1,11 +1,11 @@
-import { Marker } from "./marker";
+import { PlacedMarker } from "./marker";
 import { Modifier } from "./modifier";
 
 export interface DefaultTile {
   type: "default";
   row: number;
   column: number;
-  marker: Marker | null;
+  marker: PlacedMarker | null;
 }
 
 export interface ModifierTile {
@@ -13,14 +13,14 @@ export interface ModifierTile {
   row: number;
   column: number;
   modifier: Modifier;
-  marker: Marker | null;
+  marker: PlacedMarker | null;
 }
 
 export interface StartTile {
   type: "start";
   row: number;
   column: number;
-  marker: Marker;
+  marker: PlacedMarker;
 }
 
 export type Tile = DefaultTile | ModifierTile | StartTile;

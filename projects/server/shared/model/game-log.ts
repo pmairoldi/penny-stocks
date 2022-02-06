@@ -8,14 +8,14 @@ function placeMarkeLog(tile: Tile): GameLogEventDTO | null {
     case "default":
       return tile.marker == null
         ? null
-        : { type: "place-marker", marker: tile.marker };
+        : { type: "place-marker", marker: tile.marker.type };
 
     case "modifier":
       return tile.marker == null
         ? null
         : {
             type: "place-marker",
-            marker: tile.marker,
+            marker: tile.marker.type,
             modifier: tile.modifier,
           };
 

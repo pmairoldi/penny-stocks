@@ -149,7 +149,10 @@ const placeMarker = (state: GameState) => {
     }
 
     const modifier = getModifierFor(board, row, column);
-    const updatedBoard = board.setMarker(row, column, marker);
+    const updatedBoard = board.setMarker(row, column, {
+      type: marker,
+      playerId: playerId,
+    });
 
     const pricesUpdate = pricesModifier(modifier);
 

@@ -1,11 +1,11 @@
-import { MarkerDTO } from "./marker";
+import { PlacedMarkerDTO } from "./marker";
 import { ModifierDTO } from "./modifier";
 
 export interface DefaultTileDTO {
   type: "default";
   row: number;
   column: number;
-  marker: MarkerDTO | null;
+  marker: PlacedMarkerDTO | null;
 }
 
 export interface ModifierTileDTO {
@@ -13,14 +13,14 @@ export interface ModifierTileDTO {
   row: number;
   column: number;
   modifier: ModifierDTO;
-  marker: MarkerDTO | null;
+  marker: PlacedMarkerDTO | null;
 }
 
 export interface StartTileDTO {
   type: "start";
   row: number;
   column: number;
-  marker: MarkerDTO;
+  marker: PlacedMarkerDTO;
 }
 
 export type TileDTO = DefaultTileDTO | ModifierTileDTO | StartTileDTO;

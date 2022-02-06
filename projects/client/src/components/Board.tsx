@@ -1,7 +1,7 @@
 import { FC, useCallback, useMemo, useRef } from "react";
 import styled from "styled-components";
-import { useScale } from "../hooks";
 import { GameDTO } from "../../../server/shared/dto";
+import { useScale } from "../hooks";
 import { DefaultTile, ModifierTile, StartTile } from "./Tile";
 
 interface BoardProps {
@@ -44,6 +44,10 @@ export const Board: FC<BoardProps & { className?: string }> = (props) => {
     return game.board;
   }, [game]);
 
+  const players = useMemo(() => {
+    return game.players;
+  }, [game]);
+
   const onTileClick = useCallback(
     (row: number, column: number) => {
       placeMarker(row, column);
@@ -65,6 +69,7 @@ export const Board: FC<BoardProps & { className?: string }> = (props) => {
                       row={tile.row}
                       column={tile.column}
                       marker={tile.marker}
+                      players={players}
                       onClick={onTileClick}
                     />
                   );
@@ -76,6 +81,7 @@ export const Board: FC<BoardProps & { className?: string }> = (props) => {
                       column={tile.column}
                       marker={tile.marker}
                       modifier={tile.modifier}
+                      players={players}
                       onClick={onTileClick}
                     />
                   );

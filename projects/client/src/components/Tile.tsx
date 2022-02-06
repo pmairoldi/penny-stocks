@@ -1,13 +1,19 @@
 import { FC, useCallback, useMemo } from "react";
 import styled, { css } from "styled-components";
-import { MarkerDTO, ModifierDTO } from "../../../server/shared/dto";
+import {
+  MarkerDTO,
+  ModifierDTO,
+  PlacedMarkerDTO,
+  PlayerDTO,
+} from "../../../server/shared/dto";
 import { Marker } from "./Marker";
 import { textForModifier } from "./util";
 
 interface DefaultTileProps {
   row: number;
   column: number;
-  marker: MarkerDTO | null;
+  marker: PlacedMarkerDTO | null;
+  players: PlayerDTO[];
   onClick: (row: number, column: number) => void;
 }
 
@@ -34,7 +40,7 @@ const StyledDefaultTile = styled(StyledTile)`
 `;
 
 export const DefaultTile: FC<DefaultTileProps> = (props) => {
-  const { row, column, marker, onClick: clickHandler } = props;
+  const { row, column, marker, players, onClick: clickHandler } = props;
 
   const disabled = useMemo(() => {
     return marker != null;
@@ -44,9 +50,32 @@ export const DefaultTile: FC<DefaultTileProps> = (props) => {
     clickHandler(row, column);
   }, [row, column, clickHandler]);
 
+  const playerName = useMemo(() => {
+    if (marker == null) {
+      return undefined;
+    } else {
+      const player = players.find((p) => p.id === marker.playerId);
+      if (player != null) {
+        return player.name;
+      } else {
+        return "Player";
+      }
+    }
+  }, [marker, players]);
+
+  const placedBy = useMemo(() => {
+    if (playerName == null) {
+      return undefined;
+    } else {
+      return `Placed by ${playerName}`;
+    }
+  }, [playerName]);
+
   return (
     <StyledDefaultTile onClick={onClick} disabled={disabled}>
-      {marker != null ? <StyledTileMarker marker={marker} /> : null}
+      {marker != null ? (
+        <StyledTileMarker marker={marker.type} title={placedBy} />
+      ) : null}
     </StyledDefaultTile>
   );
 };
@@ -55,7 +84,8 @@ interface ModifierTileProps {
   row: number;
   column: number;
   modifier: ModifierDTO;
-  marker: MarkerDTO | null;
+  marker: PlacedMarkerDTO | null;
+  players: PlayerDTO[];
   onClick: (row: number, column: number) => void;
 }
 
@@ -96,7 +126,14 @@ const StyledTileMarker = styled(Marker)`
 `;
 
 export const ModifierTile: FC<ModifierTileProps> = (props) => {
-  const { row, column, modifier, marker, onClick: clickHandler } = props;
+  const {
+    row,
+    column,
+    modifier,
+    marker,
+    players,
+    onClick: clickHandler,
+  } = props;
 
   const disabled = useMemo(() => {
     return marker != null;
@@ -111,6 +148,7 @@ export const ModifierTile: FC<ModifierTileProps> = (props) => {
       case "crash":
       case "payday":
         return true;
+
       default:
         return false;
     }
@@ -122,14 +160,18 @@ export const ModifierTile: FC<ModifierTileProps> = (props) => {
       case "plus-2":
       case "plus-3":
         return "green";
+
       case "plus-5":
         return "blue";
+
       case "minus-1":
       case "minus-2":
       case "minus-3":
         return "red";
+
       case "crash":
         return marker != null ? "red" : "blue";
+
       case "payday":
         return marker != null ? "green" : "blue";
     }
@@ -138,6 +180,27 @@ export const ModifierTile: FC<ModifierTileProps> = (props) => {
   const modifierText = useMemo(() => {
     return textForModifier(modifier);
   }, [modifier]);
+
+  const playerName = useMemo(() => {
+    if (marker == null) {
+      return undefined;
+    } else {
+      const player = players.find((p) => p.id === marker.playerId);
+      if (player != null) {
+        return player.name;
+      } else {
+        return "Player";
+      }
+    }
+  }, [marker, players]);
+
+  const placedBy = useMemo(() => {
+    if (playerName == null) {
+      return undefined;
+    } else {
+      return `Placed by ${playerName} on ${modifierText.toLowerCase()}`;
+    }
+  }, [playerName, modifierText]);
 
   return (
     <StyledModifierTile onClick={onClick} disabled={disabled} kind={kind}>
@@ -148,7 +211,9 @@ export const ModifierTile: FC<ModifierTileProps> = (props) => {
       ) : (
         <StyledModiferText>{modifierText}</StyledModiferText>
       )}
-      {marker != null ? <StyledTileMarker marker={marker} /> : null}
+      {marker != null ? (
+        <StyledTileMarker marker={marker.type} title={placedBy} />
+      ) : null}
     </StyledModifierTile>
   );
 };
@@ -156,7 +221,7 @@ export const ModifierTile: FC<ModifierTileProps> = (props) => {
 interface StartTileProps {
   row: number;
   column: number;
-  marker: MarkerDTO;
+  marker: PlacedMarkerDTO;
 }
 
 const StyledStartTile = styled(StyledTile)<{ color: MarkerDTO }>`
@@ -190,5 +255,9 @@ const StyledStartTile = styled(StyledTile)<{ color: MarkerDTO }>`
 export const StartTile: FC<StartTileProps> = (props) => {
   const { marker } = props;
 
-  return <StyledStartTile color={marker}>Start</StyledStartTile>;
+  return (
+    <StyledStartTile color={marker.type} disabled={true}>
+      Start
+    </StyledStartTile>
+  );
 };
