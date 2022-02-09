@@ -1,4 +1,4 @@
-import { FC, useCallback, useMemo } from "react";
+import { FC, useCallback, useEffect, useMemo } from "react";
 import styled from "styled-components";
 import {
   ActionDTO,
@@ -7,6 +7,7 @@ import {
   MarkerDTO,
   PlayerDTO,
 } from "../../../server/shared/dto";
+import useSoundEffect from "../hooks/useSoundEffect";
 import { Board } from "./Board";
 import { GameLog } from "./GameLog";
 import { Player } from "./Player";
@@ -94,6 +95,11 @@ const InfoContainer = styled.div`
 export const Game: FC<GameProps> = (props) => {
   const { me: sessionPlayer, game, logs, updateGame } = props;
 
+  const playerTurnSound = useSoundEffect("/sounds/player-turn.m4a", {
+    volume: 0.25,
+    rate: 2.0,
+  });
+
   const me = useMemo(() => {
     return game.players.find((p) => p.id === sessionPlayer.id);
   }, [sessionPlayer, game]);
@@ -109,6 +115,18 @@ export const Game: FC<GameProps> = (props) => {
   const turn = useMemo(() => {
     return game.turn;
   }, [game]);
+
+  const isMyTurn = useMemo(() => {
+    return turn != null && turn.playerId === me?.id;
+  }, [turn, me]);
+
+  useEffect(() => {
+    if (isMyTurn) {
+      playerTurnSound.play();
+    } else {
+      playerTurnSound.stop();
+    }
+  }, [playerTurnSound, isMyTurn]);
 
   const bluePrice = useMemo(() => {
     return prices.blue;
