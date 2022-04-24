@@ -1,16 +1,16 @@
 import { FC, useCallback, useEffect, useMemo } from "react";
-import { useHistory, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Game, Lobby } from "../../components";
 import { GameOver } from "../../components/GameOver";
 import { CreateUser } from "./CreateUser";
 import { useSession } from "./useSession";
 
 export const Room: FC = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const onNotFound = useCallback(() => {
-    history.replace("/");
-  }, [history]);
+    navigate("/", { replace: true });
+  }, [navigate]);
 
   const server = useSession(onNotFound);
 
@@ -26,9 +26,9 @@ export const Room: FC = () => {
 
   useEffect(() => {
     if (game != null) {
-      history.replace(`/room/${game.id}`);
+      navigate(`/room/${game.id}`, { replace: true });
     }
-  }, [game, history]);
+  }, [game, navigate]);
 
   return (
     <>

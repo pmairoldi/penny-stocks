@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { Redirect, Route, Switch } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import styled from "styled-components";
 import { Home, Room } from "./pages";
 
@@ -13,20 +13,12 @@ const AppContainer = styled.div`
 const App: FC = () => {
   return (
     <AppContainer>
-      <Switch>
-        <Route exact path="/">
-          <Home />
-        </Route>
-        <Route path="/room/create">
-          <Room />
-        </Route>
-        <Route path="/room/:id">
-          <Room />
-        </Route>
-        <Route path="*">
-          <Redirect to="/" />
-        </Route>
-      </Switch>
+      <Routes>
+        <Route path="/" element={<Home />}></Route>
+        <Route path="/room/create" element={<Room />}></Route>
+        <Route path="/room/:id" element={<Room />}></Route>
+        <Route path="*" element={<Navigate to="/" />}></Route>
+      </Routes>
     </AppContainer>
   );
 };

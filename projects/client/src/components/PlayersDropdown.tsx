@@ -1,9 +1,9 @@
-import { FC, useCallback, useRef, useState } from "react";
+import { FC, PropsWithChildren, useCallback, useRef, useState } from "react";
 import styled from "styled-components";
 import { useEventListener } from "../hooks";
 import { Button } from "./Button";
 
-interface PayersDropdownProps {}
+type PayersDropdownProps = PropsWithChildren<{}>;
 
 const Dropdown = styled.div`
   position: relative;
