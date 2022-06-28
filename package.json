@@ -10,13 +10,13 @@
   },
   "scripts": {
     "prepare": "husky install",
+    "install": "npm run install:client && npm run install:server",
+    "install:client": "cd ./projects/client && npm install",
     "start:client": "cd ./projects/client && npm start",
+    "install:server": "cd ./projects/server && npm install",
     "start:server": "cd ./projects/server && npm start",
     "start:server:debug": "cd ./projects/server && npm run start:debug"
   },
-  "workspaces": [
-    "projects/*"
-  ],
   "dependencies": {
     "husky": "latest",
     "lint-staged": "latest",
