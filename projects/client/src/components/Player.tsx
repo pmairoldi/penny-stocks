@@ -1,6 +1,6 @@
 import { FC, ReactElement } from "react";
 import styled from "styled-components";
-import { MarkerDTO, PlayerDTO } from "@penny-stocks/shared";
+import { MarkerDTO, PlayerDTO } from "../../../server/shared/dto";
 import { Marker } from "./Marker";
 
 interface PlayerProps {

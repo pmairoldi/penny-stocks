@@ -5,7 +5,6 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "paths": { "@penny-stocks/shared": ["../shared"] }
+    "forceConsistentCasingInFileNames": true
   }
 }

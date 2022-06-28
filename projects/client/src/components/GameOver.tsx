@@ -1,6 +1,11 @@
 import { FC, Fragment, useCallback, useMemo } from "react";
 import styled from "styled-components";
-import { GameDTO, MarkerDTO, PlayerDTO, PricesDTO } from "@penny-stocks/shared";
+import {
+  GameDTO,
+  MarkerDTO,
+  PlayerDTO,
+  PricesDTO,
+} from "../../../server/shared/dto";
 import { LargeButton } from "./Button";
 import { HSpacer, HStack, VSpacer, VStack } from "./layouts";
 import { Marker } from "./Marker";

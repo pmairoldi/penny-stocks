@@ -4,13 +4,12 @@
   "author": "Pierre-Marc Airoldi",
   "private": true,
   "scripts": {
-    "start": "node --nolazy -r ts-node/register -r tsconfig-paths/register src/index.ts",
-    "start:debug": "node --nolazy --inspect -r ts-node/register -r tsconfig-paths/register src/index.ts"
+    "start": "node --nolazy -r ts-node/register index.ts",
+    "start:debug": "node --nolazy --inspect -r ts-node/register index.ts"
   },
   "dependencies": {
     "socket.io": "4.4.0",
     "ts-node": "10.4.0",
-    "tsconfig-paths": "4.0.0",
     "typescript": "4.5.4",
     "unique-names-generator": "4.6.0"
   }

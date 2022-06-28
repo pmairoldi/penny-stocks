@@ -5,7 +5,7 @@ import {
   ModifierDTO,
   PlacedMarkerDTO,
   PlayerDTO,
-} from "@penny-stocks/shared";
+} from "../../../server/shared/dto";
 import { Marker } from "./Marker";
 import { textForModifier } from "./util";
 

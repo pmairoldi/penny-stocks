@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { server, Session } from "../../client";
-import { GameDTO, GameLogEntryDTO } from "@penny-stocks/shared";
+import { GameDTO, GameLogEntryDTO } from "../../../../server/shared/dto";
 
 export interface UseSessionValue {
   session: Session | undefined;
