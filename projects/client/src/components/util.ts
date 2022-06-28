@@ -1,4 +1,4 @@
-import { ModifierDTO } from "../../../server/shared/dto";
+import { ModifierDTO } from "@penny-stocks/shared";
 
 export const textForModifier = (modifier: ModifierDTO) => {
   switch (modifier) {

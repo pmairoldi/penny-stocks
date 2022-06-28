@@ -16,7 +16,7 @@ import {
   gameLogFromAction,
   jsonFromGame,
   jsonFromPlayer,
-} from "./shared";
+} from "@penny-stocks/shared";
 
 const httpServer = createServer();
 
@@ -154,7 +154,7 @@ io.on("connection", (socket) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3001;
 
 httpServer.listen(PORT, () =>
   console.log(`server listening at http://localhost:${PORT}`)

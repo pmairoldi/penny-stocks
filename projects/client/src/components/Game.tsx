@@ -6,7 +6,7 @@ import {
   GameLogEntryDTO,
   MarkerDTO,
   PlayerDTO,
-} from "../../../server/shared/dto";
+} from "@penny-stocks/shared";
 import useSoundEffect from "../hooks/useSoundEffect";
 import { Board } from "./Board";
 import { GameLog } from "./GameLog";

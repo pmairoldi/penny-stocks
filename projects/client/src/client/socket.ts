@@ -4,12 +4,12 @@ import {
   GameDTO,
   GameLogEntryDTO,
   PlayerDTO,
-} from "../../../server/shared/dto";
+} from "@penny-stocks/shared";
 import { Server } from "./server";
 
 const URL =
   process.env.NODE_ENV === "development"
-    ? "http://localhost:5000"
+    ? "http://localhost:3001"
     : "https://penny-stocks.herokuapp.com/";
 
 const socket = io(URL, { autoConnect: false });

@@ -1,6 +1,6 @@
 import { FC, useCallback, useMemo } from "react";
 import styled from "styled-components";
-import { GameDTO } from "../../../server/shared/dto";
+import { GameDTO } from "@penny-stocks/shared";
 import { LargeButton } from "./Button";
 
 interface LobbyProps {

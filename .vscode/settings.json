@@ -1,6 +1,5 @@
 {
-  "css.customData": [
-    "./.vscode/custom.css-data.json"
-  ],
-  "editor.tabSize": 2
+  "css.customData": ["./.vscode/custom.css-data.json"],
+  "editor.tabSize": 2,
+  "typescript.tsdk": "node_modules/typescript/lib"
 }
