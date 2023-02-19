@@ -124,6 +124,11 @@ const createModifers = (): Modifier[] => {
   const create = (modifier: Modifier, count: number) =>
     new Array<Modifier>(count).fill(modifier);
 
+  let payday = Math.floor(Math.random() * 16) + 1;
+  let crash = 16 - payday;
+
+  console.log({ payday: payday, crash: crash });
+
   return [
     ...create("plus-1", 5),
     ...create("plus-2", 8),
@@ -131,8 +136,8 @@ const createModifers = (): Modifier[] => {
     ...create("minus-1", 3),
     ...create("minus-2", 6),
     ...create("minus-3", 4),
-    ...create("payday", 8),
-    ...create("crash", 8),
+    ...create("payday", payday),
+    ...create("crash", crash),
   ];
 };
 
